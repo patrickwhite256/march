@@ -7,19 +7,24 @@ Technologies
 ------------
 
 - Python
-- PyGUI (http://www.cosc.canterbury.ac.nz/greg.ewing/python_gui/)
-- TBD
+- PyQt
 
 Logical Components
 ------------------
 
 - Data Models
- - Notes Complete before 20 September (YW, PW)
+ - Notes Complete before 20 September (YW, PW) [Complete]
+ - Work on some necessary model helper functions (PW)
 - Playing selections of audio (.ogg)
- - Decide on library by 20 September (KM)
+ - Decide on library by 20 September (KM) [~]
+  - Some libraries looked, some issues with all.
+ - Trying PyQt sound stuff (KM)
 - Parser / Serializer
+ - Begin parsing simfile into internal representation (PW)
 - User Interface
- - Play with PyGUI and see if it's crap by 20 September (JM, AW)
+ - Play with PyGUI and see if it's crap by 20 September (JM, AW) [Complete]
+  - It is in fact crap, using PyQt instead
+ - Create wireframe designs for UI (JM, YW)
 
 Group Members
 -------------
