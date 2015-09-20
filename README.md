@@ -34,3 +34,9 @@ Group Members
 - Patrick White
 - Amanda Wiskar
 - Yeting Wang
+
+Setup Directions
+----------------
+
+- PyQt Installation - follow http://pyqt.sourceforge.net/Docs/PyQt5/installation.html
+ - You may also have to install Qt 5.4.1. You can get it here http://www.qt.io/download-open-source/
