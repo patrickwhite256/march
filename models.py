@@ -29,7 +29,7 @@ class Chart(Model):
         self.rating = None
 
 
-class Song:
+class Song(Model):
     '''
     Metadata about a song, and all of the charts associated with it.
 
@@ -55,7 +55,7 @@ class Song:
         self.bpms = ''
 
 
-class Measure:
+class Measure(Model):
     '''
     Data and notes about a single measure in a chart (usually 4 beats)
 
@@ -63,8 +63,9 @@ class Measure:
         rows: number of rows in this measure
         notes: list of notes in this measure
         time: time (in seconds) between the start of the song and the start of this measure
-        bpms: list of 2-tuples (time in seconds, bpm) of bpm changes in this measure.
-              if empty, assumes bpm to be the same as previous measure
+        bpms: list of 2-tuples (time in seconds from start of measure, bpm) of
+              bpm changes in this measure.
+              must have at least 1 specifying the initial bpm of the measure
     '''
 
     def init_fields(self):
@@ -73,8 +74,27 @@ class Measure:
         self.bpms = []
         self.notes = []
 
+    def duration(self):
+        '''
+        Calculate the duration (in seconds) of this measure based on its bpms
+        Assumes 4/4 time (all simfiles are 4/4)
 
-class Note:
+        :return: the seconds that this measure lasts
+        '''
+        duration = 0
+        total_beats = 0
+        for i, bpm in enumerate(self.bpms[1:]):
+            prev_bpm = self.bpms[i]
+            time_diff = bpm[0] - prev_bpm[0]
+            duration += time_diff
+            beats = time_diff * prev_bpm[1] / 60  # b = s * b/min / (60 s/min)
+            total_beats += beats
+        duration += (4 - total_beats) * 60 / self.bpms[-1][1]  # account for last bpm section
+
+        return duration
+
+
+class Note(Model):
     '''
     A single note in a chart.
 
