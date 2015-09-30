@@ -21,12 +21,16 @@ class Chart(Model):
         author: the name of the author of the chart.
         difficulty: the named difficulty of the chart
         rating: the numeric difficulty of the chart
+
+        measures: list of measures in the chart
     '''
 
     def init_fields(self):
         self.author = None
         self.difficulty = None
         self.rating = None
+
+        self.measures = []
 
 
 class Song(Model):
@@ -42,6 +46,7 @@ class Song(Model):
         sample_st: start time (in seconds) of the sample
         sample_len: length (in seconds) of the sample
         bpms: the BPM range of the song, as a string
+        charts: list of charts in the song
     '''
 
     def init_fields(self):
@@ -53,6 +58,8 @@ class Song(Model):
         self.sample_st = 0
         self.sample_len = 0
         self.bpms = ''
+
+        self.charts = []
 
 
 class Measure(Model):
@@ -72,6 +79,7 @@ class Measure(Model):
         self.rows = 0
         self.time = 0
         self.bpms = []
+
         self.notes = []
 
     def duration(self):
@@ -110,8 +118,16 @@ class Note(Model):
     POSITION_UP = 2
     POSITION_RIGHT = 3
 
+    TYPE_NONE = '0'
+    TYPE_END = '3'
+
     def __init__(self, **kwargs):
         raise NotImplementedError
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return False
 
     def init_fields(self):
         self.position = 0
@@ -124,8 +140,12 @@ class Tap(Note):
     A type of note that only has to be pressed once.
     '''
 
-    TYPE_NORMAL = 1
+    TYPE_NORMAL = '1'
     TYPE_MINE = 'M'
+    TYPES = [TYPE_NORMAL, TYPE_MINE]
+
+    def __init__(self, **kwargs):
+        Model.__init__(self, **kwargs)
 
     def init_fields(self):
         super().init_fields()
@@ -139,8 +159,12 @@ class Hold(Note):
         duration: the duration (in measures) this note should last
     '''
 
-    TYPE_HOLD = 2
-    TYPE_ROLL = 4
+    TYPE_HOLD = '2'
+    TYPE_ROLL = '4'
+    TYPES = [TYPE_HOLD, TYPE_ROLL]
+
+    def __init__(self, **kwargs):
+        Model.__init__(self, **kwargs)
 
     def init_fields(self):
         super().init_fields()
