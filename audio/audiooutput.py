@@ -1,22 +1,20 @@
 #!/usr/bin/env python
 
-#############################################################################
 #
-# Testing audio - Kelly McBride 2015
+# Testing audio
 #
-#
-#############################################################################
 
 from PyQt5.QtCore import pyqtSignal, QUrl, QFileInfo, QTime
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QGridLayout,
-        QVBoxLayout, QToolButton, QLineEdit)
+        QVBoxLayout, QHBoxLayout, QToolButton, QLineEdit)
 
 
 class AudioControl(QWidget):
 
     play = pyqtSignal()
     pause = pyqtSignal()
+    stop = pyqtSignal()
 
     def __init__(self, parent=None):
         super(AudioControl, self).__init__(parent)
@@ -25,11 +23,21 @@ class AudioControl(QWidget):
         # when in StoppedState
         self.playerState = QMediaPlayer.StoppedState
 
-        # give it buttons that will be useful
         # this button should toggle play and pause
         self.playButton = QToolButton(clicked=self.playPressed)
         self.playButton.setText("play")
 
+        # TODO stop button
+        self.stopButton = QToolButton(clicked=self.stopPressed)
+        self.stopButton.setText("stop")
+
+        # TODO play interval button.
+        # after playing interval, go back to stopped state.
+
+        # TODO validators on these fields.
+        # - ints (or floats? they could potentially have decimals)
+        # - not greater than song length
+        # - not less than 0
         self.startLabel = QLabel("Start Time (s):")
         self.startTime = QLineEdit()
         self.startTime.setText('0')
@@ -39,14 +47,18 @@ class AudioControl(QWidget):
         self.endTime.setText('0')
 
         mainLayout = QGridLayout()
-        mainLayout.addWidget(self.playButton, 0, 0)
+
+        stdButtonLayout = QHBoxLayout()
+        stdButtonLayout.addWidget(self.playButton)
+        stdButtonLayout.addWidget(self.stopButton)
+        mainLayout.addLayout(stdButtonLayout, 0, 0)
         mainLayout.addWidget(self.startLabel, 1, 0)
         mainLayout.addWidget(self.endLabel, 1, 1)
         mainLayout.addWidget(self.startTime, 2, 0)
         mainLayout.addWidget(self.endTime, 2, 1)
 
         self.setLayout(mainLayout)
-        self.setWindowTitle("Shitty Audio Player???")
+        self.setWindowTitle("Audio Player???")
 
     def state(self):
         return self.playerState
@@ -55,13 +67,14 @@ class AudioControl(QWidget):
         if state != self.playerState:
             self.playerState = state
 
-            if state == QMediaPlayer.PausedState:
+            if state in (QMediaPlayer.PausedState, QMediaPlayer.StoppedState):
                 self.playButton.setText("play")
             elif state == QMediaPlayer.PlayingState:
                 self.playButton.setText("pause")
 
+    # TODO is it just me or is this grody? ^, then v. grody if/elif
     def playPressed(self):
-        if self.playerState == QMediaPlayer.PausedState:
+        if self.playerState in (QMediaPlayer.PausedState, QMediaPlayer.StoppedState):
             self.setState(QMediaPlayer.PlayingState)
             print("player state now playing.")
             self.play.emit()
@@ -69,10 +82,11 @@ class AudioControl(QWidget):
             self.setState(QMediaPlayer.PausedState)
             print("player state now paused.")
             self.pause.emit()
-        else:
-            print("player state is neither paused nor playing.")
-            print("Player state", self.playerState)
-            # 0 = stopped, 1 = paused i think, 2 = playing (i think)
+
+    def stopPressed(self):
+        self.setState(QMediaPlayer.StoppedState)
+        print("player state now stopped.")
+        self.stop.emit()
 
 
 class AudioPlayer(QWidget):
@@ -101,6 +115,7 @@ class AudioPlayer(QWidget):
         controls.setState(self.media_player.state())
         controls.play.connect(self.media_player.play)
         controls.pause.connect(self.media_player.pause)
+        controls.stop.connect(self.media_player.stop)
 
         layout = QVBoxLayout()
         layout.addWidget(controls)
