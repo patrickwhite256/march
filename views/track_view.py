@@ -130,8 +130,3 @@ class MarchTrackView(QWidget):
 		self.row = int(y / INTERVAL_SPACING)
 
 		self.update()
-		
-				
-
-
-
