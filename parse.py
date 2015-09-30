@@ -75,7 +75,7 @@ def parse_chart(chart_contents):
 
     for measure_string in measure_strings:
         measure = models.Measure()
-        rows = [_ for _ in measure_string.splitlines() if _]  # discard empty lines
+        rows = [_.strip() for _ in measure_string.splitlines() if _]  # discard empty lines
         measure.rows = len(rows)
 
         for row_count, row in enumerate(rows):
@@ -130,7 +130,10 @@ def apply_bpms(chart, bpm_changes):
     time = 0
     for measure in chart.measures:
         measure.time = time
+        if next_bpm is not None and next_bpm['start_time'] == time:
+            current_bpm, next_bpm = next_bpm, next(bpm_it, None)
         measure.bpms.append((0, current_bpm['bpm']))
+
         while next_bpm is not None and time + measure.duration() > next_bpm['start_time']:
             measure.bpms.append((next_bpm['start_time'] - time, next_bpm['bpm']))
             current_bpm, next_bpm = next_bpm, next(bpm_it, None)

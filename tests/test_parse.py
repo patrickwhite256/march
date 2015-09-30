@@ -1,9 +1,11 @@
 from io import StringIO
 
+import pytest
+
 import parse
 from models import Tap, Hold, Note
 
-ATTR_SONG = """#TITLE:foo;
+ATTR_SONG = '''#TITLE:foo;
 #BANNER:foo.png;
 #BACKGROUND:bar.png;
 #MUSIC:foo.ogg;
@@ -11,7 +13,7 @@ ATTR_SONG = """#TITLE:foo;
 #SAMPLESTART:133.7;
 #SAMPLELENGTH:13.37;
 #DISPLAYBPM:13.3-133.7;
-"""
+'''
 
 
 def test_parse_song_attrs():
@@ -28,7 +30,7 @@ def test_parse_song_attrs():
     assert song.sample_len == 13.37
     assert song.bpms == '13.3-133.7'
 
-ATTR_CHART = """
+ATTR_CHART = '''
      dance-single:
      foo:
      Beginner:
@@ -38,7 +40,7 @@ ATTR_CHART = """
 0000
 0000
 0000
-"""
+'''
 
 
 def test_parse_chart_attrs():
@@ -48,7 +50,7 @@ def test_parse_chart_attrs():
     assert chart.difficulty == 'Beginner'
     assert chart.rating == 3
 
-MEASURE_CHART = """
+MEASURE_CHART = '''
      dance-single:
      foo:
      Beginner:
@@ -58,7 +60,7 @@ MEASURE_CHART = """
 0000
 00M0
 0300
-"""
+'''
 
 
 def test_parse_chart_measure():
@@ -79,7 +81,7 @@ def test_parse_chart_measure():
     for note in required_notes:
         assert note in measure.notes
 
-LONG_HOLD_CHART = """
+LONG_HOLD_CHART = '''
      dance-single:
      foo:
      Beginner:
@@ -98,7 +100,7 @@ LONG_HOLD_CHART = """
 0000
 0000
 0000
-"""
+'''
 
 
 def test_parse_long_hold():
@@ -113,7 +115,7 @@ def test_parse_long_hold():
     assert chart.measures[0].notes[0] == ideal_note
 
 
-MULTI_HOLD_CHART = """
+MULTI_HOLD_CHART = '''
      dance-single:
      foo:
      Beginner:
@@ -132,7 +134,7 @@ MULTI_HOLD_CHART = """
 0003
 0000
 0000
-"""
+'''
 
 
 def test_parse_multiple_holds():
@@ -157,3 +159,84 @@ def test_parse_multiple_holds():
         assert note in chart.measures[0].notes
     for note in second_measure_notes:
         assert note in chart.measures[1].notes
+
+FUCKY_CHART = '''
+     dance-single:
+     foo:
+     Beginner:
+     3:
+     0.135,0.176,0.000,0.000,0.000:
+1001
+0000
+0000
+0000
+,  0021
+0000
+0030
+0000
+'''
+
+
+def test_parse_chart_fucky_spacing():
+    chart = parse.parse_chart(FUCKY_CHART)
+
+    assert len(chart.measures) == 2
+
+    assert len(chart.measures[0].notes) == 2
+    assert len(chart.measures[1].notes) == 2
+
+N_MEASURES = 8
+
+
+@pytest.fixture
+def basic_chart():
+    chart = '''
+     dance-single:
+     foo:
+     Beginner:
+     3:
+     0.135,0.176,0.000,0.000,0.000:
+'''
+    measures = []
+    for i in range(0, N_MEASURES):
+        measure = ''
+        for i in range(0, 4):
+            measure += '0000\n'
+        measures.append(measure)
+
+    chart += ',\n'.join(measures)
+
+    return parse.parse_chart(chart)
+
+
+def test_apply_bpms_basic(basic_chart):
+    bpm_changes = ['0.0=240.00']
+    parse.apply_bpms(basic_chart, bpm_changes)
+
+    for i in range(0, N_MEASURES):
+        assert basic_chart.measures[i].bpms == [(0, 240)]
+        assert basic_chart.measures[i].duration() == 1
+
+
+def test_apply_bpms_change(basic_chart):
+    bpm_changes = ['0.0=240.00', '1.5=120.00']
+    parse.apply_bpms(basic_chart, bpm_changes)
+
+    assert basic_chart.measures[0].duration() == 1
+    assert basic_chart.measures[0].bpms == [(0, 240)]
+    assert basic_chart.measures[1].duration() == 1.5
+    assert basic_chart.measures[1].bpms == [(0, 240), (0.5, 120)]
+    for i in range(2, N_MEASURES):
+        assert basic_chart.measures[i].duration() == 2
+        assert basic_chart.measures[i].bpms == [(0, 120)]
+
+
+def test_apply_bpms_change_on_measure(basic_chart):
+    bpm_changes = ['0.0=240.00', '1=120.00']
+    parse.apply_bpms(basic_chart, bpm_changes)
+
+    assert basic_chart.measures[0].bpms == [(0, 240)]
+    assert basic_chart.measures[0].duration() == 1
+    for i in range(1, N_MEASURES):
+        assert basic_chart.measures[i].bpms == [(0, 120)]
+        assert basic_chart.measures[i].duration() == 2
