@@ -40,3 +40,18 @@ Setup Directions
 
 - PyQt Installation - follow http://pyqt.sourceforge.net/Docs/PyQt5/installation.html
  - You may also have to install Qt 5.4.1. You can get it here http://www.qt.io/download-open-source/
+
+
+| Must-Haves               | Not Doing           |
+|--------------------------|---------------------|
+| - jump to bar            | - mods              |
+| - general metadata editor| - playing at speed  |
+| - sample player          | - copypaste sections|
+| - drag & drop track      | - waveform bg       |
+| - difficulty tabs        | - keyboard          |
+| - dialogs for new things |                     |
+| - zooming                |                     |
+
+                            
+			    
+
