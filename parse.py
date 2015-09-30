@@ -30,13 +30,16 @@ def parse_song(song_file):
     parts = [_.split('#')[1] for _ in contents.split(';')[:-1]]
 
     inverse_map = {v: k for k, v in FIELD_LABEL_MAP.items()}
+    bpm_changes = None
     for part in parts:
         split = part.split(':')
         key = split[0]
-        value = ','.join(split[1:])
+        value = ':'.join(split[1:])
         if key == 'NOTES':
             chart = parse_chart(value)
             song.charts.append(chart)
+        if key == 'BPMS':
+            bpm_changes = value.split(',')
         else:
             try:
                 field = inverse_map[key]
@@ -45,6 +48,9 @@ def parse_song(song_file):
                 setattr(song, field, value)
             except KeyError:  # there are attrs we don't care about
                 pass
+
+    for chart in song.charts:
+        apply_bpms(chart, bpm_changes)
 
     return song
 
@@ -57,6 +63,7 @@ def parse_chart(chart_contents):
                            all of the measures in the chart.
     :return: an instance of models.Chart
     """
+
     chart = models.Chart()
     parts = [_.strip() for _ in chart_contents.split(':')]
     chart.author = parts[1]
@@ -104,3 +111,27 @@ def parse_chart(chart_contents):
         chart.measures.append(measure)
 
     return chart
+
+
+def apply_bpms(chart, bpm_changes):
+    """
+    Applies a list of BPM changes to a chart.
+    Calculates and applies the 'time' field of measures
+
+    :param chart: a models.Chart object
+    :param bpm_changes: a list of bpm changes, in the format "t.ttt=b.bbb", sorted by time
+    """
+
+    bpms = [{'start_time': float(b.split('=')[0]), 'bpm': float(b.split('=')[1])} for b in bpm_changes]
+
+    bpm_it = iter(bpms)
+    current_bpm, next_bpm = next(bpm_it), next(bpm_it, None)
+
+    time = 0
+    for measure in chart.measures:
+        measure.time = time
+        measure.bpms.append((0, current_bpm['bpm']))
+        while next_bpm is not None and time + measure.duration() > next_bpm['start_time']:
+            measure.bpms.append((next_bpm['start_time'] - time, next_bpm['bpm']))
+            current_bpm, next_bpm = next_bpm, next(bpm_it, None)
+        time = round(time + measure.duration(), 6)  # minimize fp error
