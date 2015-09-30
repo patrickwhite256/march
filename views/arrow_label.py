@@ -47,4 +47,3 @@ class MarchArrowLabel(QLabel):
 		qp.drawRect(self.rect())
 		qp.end()
 	'''
-

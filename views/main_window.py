@@ -33,6 +33,10 @@ class MarchWindow(QWidget):
 		if(songFile is not None):
 			self.model = parse.parse_song(songFile)
 
+		self.model = models.Song()
+		if(songFile is not None):
+			self.model = parse.parse_song(songFile)
+
 		self.initUI()
 
 	

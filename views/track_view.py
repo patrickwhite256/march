@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QGridLayout, QPushButton, QSlider
 from PyQt5.QtGui import QPainter, QPen, QBrush, QPixmap
 from PyQt5.QtCore import Qt, QRect
-from models import Chart, Note, Tap
+from models import Chart, Note
 from .arrow_label import MarchArrowLabel
 
 INTERVAL_SPACING = 40
@@ -87,7 +87,7 @@ class MarchTrackView(QWidget):
 
 				qp.setPen(qpen)
 			
-				y = current_beat * INTERVAL_SPACING + self.top_offset
+				y = current_beat * INTERVAL_SPACING
 				qp.drawLine(100, y, 400, y)
 			
 		
@@ -101,16 +101,13 @@ class MarchTrackView(QWidget):
 
 	def drawNotes(self, qp):
 		for measure_index, measure in enumerate(self.model.measures):
-			note_interval = INTERVAL_SPACING * measure.rows / self.interval
-			measure_offset = INTERVAL_SPACING * self.interval * measure_index + self.top_offset
+			note_interval = len(measure.notes) / self.interval
+			measure_offset = INTERVAL_SPACING * self.interval * measure_index
 
 			for note in measure.notes:
-				arrow = MarchArrowLabel(note.position, self)
-				note_voffset = measure_offset + note.offset * note_interval - ARROW_SPACING / 2
-				note_hoffset = 90 + ARROW_SPACING * note.position # hurray for enums
-				source_rect = QRect(0, 0, ARROW_SPACING, ARROW_SPACING)
-				target_rect = QRect(note_hoffset, note_voffset, ARROW_SPACING, ARROW_SPACING)
-				qp.drawPixmap(target_rect, arrow.pixmap(), source_rect)
+				arrow = MarchArrowLabel(note.position)
+				note_voffset = note.offset * note_interval
+				note_hoffset = 100 + ARROW_SPACING * note.postion # hurray for enums
 
 
 	# Event Handlers
@@ -133,41 +130,6 @@ class MarchTrackView(QWidget):
 		y = event.pos().y()
 
 		self.column = min(int((x - 100) / ARROW_SPACING), 3)
-		self.row = int((y - self.top_offset) / INTERVAL_SPACING)
+		self.row = int(y / INTERVAL_SPACING)
 
 		self.update()
-	
-	def mousePressEvent(self, event):
-		measure_index = int(self.row / self.interval)
-		row_offset = self.row % self.interval
-		print(row_offset)
-		selected_measure = self.model.measures[measure_index]
-
-		# TODO Put note existence search fn in model
-		init_len = len(selected_measure.notes)
-
-		selected_measure.notes[:] = [note for note in selected_measure.notes if (note.offset != row_offset or note.position != self.column)]
-		
-		if (init_len == len(selected_measure.notes)):
-			#didn't remove anything, add the note here
-			new_note = Tap()
-			new_note.position = self.column
-			new_note.offset = row_offset
-			selected_measure.notes.append(new_note)
-
-		self.update()
-	
-	def wheelEvent(self, event):
-		if (event.angleDelta() is not None):
-			if (event.angleDelta().y() > 0):
-				self.top_offset += 15 
-			else:
-				self.top_offset -= 15
-
-		self.update()
-	
-		
-				
-
-
-
