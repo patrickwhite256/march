@@ -2,16 +2,15 @@
 
 #############################################################################
 #
-# Testing audio shit - Kelly McBride 2015
+# Testing audio - Kelly McBride 2015
 #
 #
 #############################################################################
 
-
 from PyQt5.QtCore import pyqtSignal, QUrl, QFileInfo, QTime
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QGridLayout,
-        QVBoxLayout, QToolButton)
+        QVBoxLayout, QToolButton, QLineEdit)
 
 
 class AudioControl(QWidget):
@@ -22,15 +21,29 @@ class AudioControl(QWidget):
     def __init__(self, parent=None):
         super(AudioControl, self).__init__(parent)
 
-        self.playerState = QMediaPlayer.PausedState
+        # TODO Make player support StoppedState, interval player only available
+        # when in StoppedState
+        self.playerState = QMediaPlayer.StoppedState
 
         # give it buttons that will be useful
         # this button should toggle play and pause
         self.playButton = QToolButton(clicked=self.playPressed)
         self.playButton.setText("play")
 
+        self.startLabel = QLabel("Start Time (s):")
+        self.startTime = QLineEdit()
+        self.startTime.setText('0')
+
+        self.endLabel = QLabel("End Time (s):")
+        self.endTime = QLineEdit()
+        self.endTime.setText('0')
+
         mainLayout = QGridLayout()
-        mainLayout.addWidget(self.playButton, 1, 1)
+        mainLayout.addWidget(self.playButton, 0, 0)
+        mainLayout.addWidget(self.startLabel, 1, 0)
+        mainLayout.addWidget(self.endLabel, 1, 1)
+        mainLayout.addWidget(self.startTime, 2, 0)
+        mainLayout.addWidget(self.endTime, 2, 1)
 
         self.setLayout(mainLayout)
         self.setWindowTitle("Shitty Audio Player???")
@@ -49,14 +62,17 @@ class AudioControl(QWidget):
 
     def playPressed(self):
         if self.playerState == QMediaPlayer.PausedState:
-            print("player state is paused.")
+            self.setState(QMediaPlayer.PlayingState)
+            print("player state now playing.")
             self.play.emit()
         elif self.playerState == QMediaPlayer.PlayingState:
-            print("player state is playing.")
+            self.setState(QMediaPlayer.PausedState)
+            print("player state now paused.")
             self.pause.emit()
         else:
             print("player state is neither paused nor playing.")
             print("Player state", self.playerState)
+            # 0 = stopped, 1 = paused i think, 2 = playing (i think)
 
 
 class AudioPlayer(QWidget):
