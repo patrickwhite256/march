@@ -42,7 +42,7 @@ Setup Directions
  - You may also have to install Qt 5.4.1. You can get it here http://www.qt.io/download-open-source/
 
 
-| Must-Haves               | Not Doing           |
+| Must-Haves               | Nice-to-haves       |
 |--------------------------|---------------------|
 | - jump to bar            | - mods              |
 | - general metadata editor| - playing at speed  |
