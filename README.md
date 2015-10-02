@@ -1,6 +1,8 @@
 March
 =====
 
+[![Build Status](https://magnum.travis-ci.com/patrickwhite256/march.svg?token=Urtvk4fuxUP8Zg5qkWzT)](https://magnum.travis-ci.com/patrickwhite256/march)
+
 A Stepmania chart editor. Created as the Internal Mini-Project component of SE390.
 
 Technologies
@@ -51,7 +53,3 @@ Setup Directions
 | - difficulty tabs        | - keyboard          |
 | - dialogs for new things |                     |
 | - zooming                |                     |
-
-                            
-			    
-
