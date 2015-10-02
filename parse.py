@@ -1,3 +1,4 @@
+import re
 import models
 
 FIELD_LABEL_MAP = {
@@ -12,6 +13,8 @@ FIELD_LABEL_MAP = {
 }
 
 NUMERIC_FIELDS = ['offset', 'sample_st', 'sample_len']
+
+COMMENT_REGEX = re.compile('.*(\/\/.*)')
 
 
 def parse_song(song_file):
@@ -76,6 +79,7 @@ def parse_chart(chart_contents):
     for measure_string in measure_strings:
         measure = models.Measure()
         rows = [_.strip() for _ in measure_string.splitlines() if _]  # discard empty lines
+        rows = [re.sub('.*(\/\/.*)', '', _) for _ in measure_string.splitlines() if _]  # remove comments
         measure.rows = len(rows)
 
         for row_count, row in enumerate(rows):
