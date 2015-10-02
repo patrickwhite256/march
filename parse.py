@@ -14,7 +14,7 @@ FIELD_LABEL_MAP = {
 
 NUMERIC_FIELDS = ['offset', 'sample_st', 'sample_len']
 
-COMMENT_REGEX = re.compile('.*(\/\/.*)')
+COMMENT_RE = re.compile('\s*(\/\/.*)?')  # strip whitespace and comments
 
 
 def parse_song(song_file):
@@ -68,6 +68,7 @@ def parse_chart(chart_contents):
     """
 
     chart = models.Chart()
+    chart_contents = '\n'.join([COMMENT_RE.sub('', _) for _ in chart_contents.splitlines()])
     parts = [_.strip() for _ in chart_contents.split(':')]
     chart.author = parts[1]
     chart.difficulty = parts[2]
@@ -78,8 +79,7 @@ def parse_chart(chart_contents):
 
     for measure_string in measure_strings:
         measure = models.Measure()
-        rows = [_.strip() for _ in measure_string.splitlines() if _]  # discard empty lines
-        rows = [re.sub('.*(\/\/.*)', '', _) for _ in measure_string.splitlines() if _]  # remove comments
+        rows = [_.strip() for _ in measure_string.splitlines() if _]
         measure.rows = len(rows)
 
         for row_count, row in enumerate(rows):

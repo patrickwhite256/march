@@ -114,6 +114,38 @@ def test_parse_long_hold():
     ideal_note = Hold(note_type=Hold.TYPE_ROLL, offset=0, duration=1.5, position=Note.POSITION_DOWN)
     assert chart.measures[0].notes[0] == ideal_note
 
+COMMENT_CHART = '''
+     dance-single:
+     foo:
+     Beginner:
+     3:
+     0.135,0.176,0.000,0.000,0.000:
+0000
+0000
+0000 //comment: comment
+0000//comment
+, // lol, comment
+0000
+0000    //comment!
+0000
+0000
+   //whitespace only line
+0000
+0000
+//comment
+0000
+0000
+'''
+
+
+def test_parse_strip_comments():
+    chart = parse.parse_chart(COMMENT_CHART)
+
+    assert len(chart.measures) == 2
+
+    assert chart.measures[0].rows == 4
+    assert chart.measures[1].rows == 8
+
 
 MULTI_HOLD_CHART = '''
      dance-single:
