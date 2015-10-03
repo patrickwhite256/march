@@ -5,6 +5,7 @@ FIELD_LABEL_MAP = {
     'title': 'TITLE',
     'banner': 'BANNER',
     'bg': 'BACKGROUND',
+    'artist': 'ARTIST',
     'music': 'MUSIC',
     'offset': 'OFFSET',
     'sample_st': 'SAMPLESTART',

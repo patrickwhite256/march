@@ -51,6 +51,7 @@ class Song(Model):
 
     def init_fields(self):
         self.title = ''
+        self.artist = ''
         self.banner = ''
         self.bg = ''
         self.music = ''
