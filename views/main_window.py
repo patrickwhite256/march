@@ -14,7 +14,7 @@ class MarchSideBarView(QFrame):
 	
 	def initUI(self):
 		self.setFrameStyle(QFrame.Box)
-		self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 		self.layout = QVBoxLayout()
 
 		self.setLayout(self.layout)
