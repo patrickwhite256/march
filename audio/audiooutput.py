@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QGridLayout,
 class AudioControl(QWidget):
 
     play = pyqtSignal()
+    play_interval = pyqtSignal()
     pause = pyqtSignal()
     stop = pyqtSignal()
 
@@ -27,12 +28,13 @@ class AudioControl(QWidget):
         self.playButton = QToolButton(clicked=self.playPressed)
         self.playButton.setText("play")
 
-        # TODO stop button
+        # stop button
         self.stopButton = QToolButton(clicked=self.stopPressed)
         self.stopButton.setText("stop")
 
-        # TODO play interval button.
-        # after playing interval, go back to stopped state.
+        # play_interval button
+        self.intervalButton = QToolButton(clicked=self.intervalPressed)
+        self.intervalButton.setText("play interval")
 
         # TODO validators on these fields.
         # - ints (or floats? they could potentially have decimals)
@@ -51,6 +53,7 @@ class AudioControl(QWidget):
         stdButtonLayout = QHBoxLayout()
         stdButtonLayout.addWidget(self.playButton)
         stdButtonLayout.addWidget(self.stopButton)
+        stdButtonLayout.addWidget(self.intervalButton)
         mainLayout.addLayout(stdButtonLayout, 0, 0)
         mainLayout.addWidget(self.startLabel, 1, 0)
         mainLayout.addWidget(self.endLabel, 1, 1)
@@ -72,6 +75,9 @@ class AudioControl(QWidget):
             elif state == QMediaPlayer.PlayingState:
                 self.playButton.setText("pause")
 
+    def getInterval(self):
+        return int(self.startTime.text()), int(self.endTime.text())
+
     # TODO is it just me or is this grody? ^, then v. grody if/elif
     def playPressed(self):
         if self.playerState in (QMediaPlayer.PausedState, QMediaPlayer.StoppedState):
@@ -88,14 +94,41 @@ class AudioControl(QWidget):
         print("player state now stopped.")
         self.stop.emit()
 
+    def intervalPressed(self):
+        if not self.playerState == QMediaPlayer.StoppedState:
+            print("player not stopped, won't play interval")
+            return
+        self.setState(QMediaPlayer.PlayingState)
+        print("playing interval")
+        self.play_interval.emit()
+
 
 class AudioPlayer(QWidget):
     def __init__(self, parent=None):
         super(AudioPlayer, self).__init__(parent)
 
         # MY CODE
+        self.init_player()
+
+        self.controls = AudioControl()
+        self.controls.setState(self.media_player.state())
+        self.controls.play.connect(self.media_player.play)
+        self.controls.pause.connect(self.media_player.pause)
+        self.controls.stop.connect(self.media_player.stop)
+        self.controls.play_interval.connect(self.playInterval)
+
+        self.init_ui()
+
+    def init_ui(self):
+        layout = QVBoxLayout()
+        layout.addWidget(self.controls)
+        layout.addWidget(self.nameLabel)
+        layout.addWidget(self.timeLabel)
+        self.setLayout(layout)
+
+    def init_player(self):
         # replace with file selector (eventually)
-        audio_file_name = "juliet.ogg"
+        audio_file_name = "audio/juliet.ogg"
         self.nameLabel = QLabel("File: " + audio_file_name)
         self.timeLabel = QLabel("00:00:00")
 
@@ -104,30 +137,23 @@ class AudioPlayer(QWidget):
         media_content = QMediaContent(url)
 
         self.media_player = QMediaPlayer()
+        self.media_player.stop()
+        self.media_player.setNotifyInterval(50)  # ms
         self.playlist = QMediaPlaylist()
         self.playlist.addMedia(media_content)
         self.media_player.setPlaylist(self.playlist)
         self.media_player.pause()
 
         self.media_player.positionChanged.connect(self.positionChanged)
-
-        controls = AudioControl()
-        controls.setState(self.media_player.state())
-        controls.play.connect(self.media_player.play)
-        controls.pause.connect(self.media_player.pause)
-        controls.stop.connect(self.media_player.stop)
-
-        layout = QVBoxLayout()
-        layout.addWidget(controls)
-        layout.addWidget(self.nameLabel)
-        layout.addWidget(self.timeLabel)
-        self.setLayout(layout)
-
-        # self.media_player.play()
+        self.intervalEnd = None  # initialize this
 
     def positionChanged(self, progress):
-        progress /= 1000  # because milliseconds, i think
-        self.updateDurationInfo(progress)
+        self.updateDurationInfo(progress/1000)  # because ms
+
+        if(self.intervalEnd and progress >= self.intervalEnd):
+            self.media_player.stop()
+            self.controls.setState(QMediaPlayer.StoppedState)
+            self.intervalEnd = None  # idk maybe something less shitty
 
     def updateDurationInfo(self, currentInfo):
         if currentInfo:
@@ -140,6 +166,18 @@ class AudioPlayer(QWidget):
             tStr = " ___ "
 
         self.timeLabel.setText(tStr)
+
+    def playInterval(self):
+        # remember, position is in milliseconds and always accessible
+        # self.media_player.position
+        # first we need the start and end
+        start, end = self.controls.getInterval()
+        start = start * 1000
+        end = end * 1000
+        self.intervalEnd = end
+        self.media_player.setPosition(start)
+        self.media_player.play()
+        self.controls.setState(QMediaPlayer.PlayingState)
 
 
 if __name__ == '__main__':
