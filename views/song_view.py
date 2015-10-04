@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QFrame, QHBoxLayout, QVBoxLayout, QSizePoli
 		
 class MarchSongSelectView(QWidget):
 	def __init__(self, parent):
-		super(MarchSongSelectView, self).__init__(parent)
+		super().__init__(parent)
 		self.initUI()
 
 	def initUI(self):
