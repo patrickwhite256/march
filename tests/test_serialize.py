@@ -50,6 +50,62 @@ def test_serialize_song_properties(song):
 
     assert f.getvalue() == PROPERTIES_STR
 
+SONG_WITH_CHART = """#TITLE:Foo;
+#SUBTITLE:;
+#ARTIST:Bar;
+#TITLETRANSLIT:;
+#SUBTITLETRANSLIT:;
+#ARTISTTRANSLIT:;
+#CREDIT:;
+#BANNER:foo.png;
+#BACKGROUND:bar.png;
+#LYRICSPATH:;
+#CDTITLE:./CDTITLES/Dancing Stage SuperNOVA.png;
+#MUSIC:foo.ogg;
+#OFFSET:1.337;
+#SAMPLESTART:133.7;
+#SAMPLELENGTH:13.37;
+#SELECTABLE:YES;
+#DISPLAYBPM:125.000-400.000;
+#STOPS:;
+#BGCHANGES:;
+#BPMS:0.000=240.000;
+#NOTES:
+     dance-single:
+     foo:
+     Beginner:
+     3:
+     0.000,0.000,0.000,0.000,0.000:
+0000
+0000
+0000
+0000
+0000
+0000
+0000
+0000
+;
+"""
+
+
+def test_serialize_song_with_chart(song):
+    chart = models.Chart(
+        author='foo',
+        difficulty='Beginner',
+        rating=3
+    )
+    chart.measures.append(models.Measure(
+        rows=8,
+        bpms=[(0, 240)],
+        time=0
+    ))
+    song.charts.append(chart)
+
+    f = StringIO()
+    serialize.serialize_song(song, f)
+
+    assert f.getvalue() == SONG_WITH_CHART
+
 
 def test_collect_bpms():
     chart = models.Chart()

@@ -44,8 +44,10 @@ def serialize_song(song, f):
     f.write(PROPERTIES_TEMPLATE.format(**song.__dict__))
     bpm_string = ''
     if song.charts:
-        bpm_string = collect_bpms(song)
+        bpm_string = collect_bpms(song.charts[0])
     f.write('#BPMS:{};\n'.format(bpm_string))
+    for chart in song.charts:
+        f.write(serialize_chart(chart))
 
 
 def serialize_chart(chart):
