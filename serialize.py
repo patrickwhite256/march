@@ -1,3 +1,5 @@
+import models
+
 PROPERTIES_TEMPLATE = """#TITLE:{title};
 #SUBTITLE:;
 #ARTIST:{artist};
@@ -19,6 +21,16 @@ PROPERTIES_TEMPLATE = """#TITLE:{title};
 #BGCHANGES:;
 """
 
+CHART_TEMPLATE = '''#NOTES:
+     dance-single:
+     {author}:
+     {difficulty}:
+     {rating}:
+     0.000,0.000,0.000,0.000,0.000:
+{notes}
+;
+'''
+
 BPM_STRING_FORMAT = '{:.3f}={:.3f}'
 
 
@@ -34,6 +46,37 @@ def serialize_song(song, f):
     if song.charts:
         bpm_string = collect_bpms(song)
     f.write('#BPMS:{};\n'.format(bpm_string))
+
+
+def serialize_chart(chart):
+    """
+    Serialize a chart to a string.
+
+    :param chart: the models.Chart object to serialize
+
+    :return: a string containing the serialized chart
+    """
+    measures = []
+    for measure in chart.measures:
+        notes = [['0', '0', '0', '0'] for _ in range(0, measure.rows)]
+        measures.append(notes)
+
+    for i, measure in enumerate(chart.measures):
+        for note in measure.notes:
+            measures[i][note.offset][note.position] = note.note_type
+            if note.note_type in models.Hold.TYPES:
+                target_measure_index = int(i + note.offset / measure.rows + note.duration)
+                target_measure = chart.measures[target_measure_index]
+                target_offset = round(((note.offset / measure.rows + note.duration) % 1) * target_measure.rows)
+                measures[target_measure_index][target_offset][note.position] = models.Note.TYPE_END
+    notes = '\n,\n'.join(
+        ['\n'.join(
+            [''.join(row) for row in measure_list]
+            ) for measure_list in measures]
+    )
+    format_dict = chart.__dict__
+    format_dict['notes'] = notes
+    return CHART_TEMPLATE.format(**format_dict)
 
 
 def collect_bpms(chart):

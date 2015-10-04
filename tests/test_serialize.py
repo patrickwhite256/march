@@ -4,6 +4,7 @@ import pytest
 
 import serialize
 import models
+from models import Tap, Hold
 
 PROPERTIES_STR = """#TITLE:Foo;
 #SUBTITLE:;
@@ -63,3 +64,154 @@ def test_collect_bpms():
     bpm_string = serialize.collect_bpms(chart)
 
     assert bpm_string == '0.000=240.000,1.500=120.000'
+
+
+CHART_SIMPLE = '''#NOTES:
+     dance-single:
+     foo:
+     Beginner:
+     3:
+     0.000,0.000,0.000,0.000,0.000:
+M000
+0000
+0010
+0001
+;
+'''
+
+
+def test_serialize_chart_simple():
+    chart = models.Chart()
+    chart.author = 'foo'
+    chart.difficulty = 'Beginner'
+    chart.rating = 3
+
+    measure = models.Measure(
+        time=0.00,
+        bpms=[(0.00, 240.00)],
+        rows=4
+    )
+    measure.notes.append(Tap(
+        position=Tap.POSITION_LEFT,
+        note_type=Tap.TYPE_MINE,
+        offset=0
+    ))
+    measure.notes.append(Tap(
+        position=Tap.POSITION_RIGHT,
+        note_type=Tap.TYPE_NORMAL,
+        offset=3
+    ))
+    measure.notes.append(Tap(
+        position=Tap.POSITION_UP,
+        note_type=Tap.TYPE_NORMAL,
+        offset=2
+    ))
+
+    chart.measures.append(measure)
+
+    assert serialize.serialize_chart(chart) == CHART_SIMPLE
+
+CHART_HOLD = '''#NOTES:
+     dance-single:
+     foo:
+     Beginner:
+     3:
+     0.000,0.000,0.000,0.000,0.000:
+0000
+0400
+0320
+0000
+0000
+0000
+0030
+0000
+;
+'''
+
+
+def test_serialize_chart_hold():
+    chart = models.Chart()
+    chart.author = 'foo'
+    chart.difficulty = 'Beginner'
+    chart.rating = 3
+
+    measure = models.Measure(
+        time=0.00,
+        bpms=[(0.00, 240.00)],
+        rows=8
+    )
+    measure.notes.append(Hold(
+        position=Hold.POSITION_DOWN,
+        note_type=Hold.TYPE_ROLL,
+        offset=1,
+        duration=0.125
+    ))
+    measure.notes.append(Hold(
+        position=Hold.POSITION_UP,
+        note_type=Hold.TYPE_HOLD,
+        offset=2,
+        duration=0.5
+    ))
+
+    chart.measures.append(measure)
+
+    assert serialize.serialize_chart(chart) == CHART_HOLD
+
+CHART_HOLD_LONG = '''#NOTES:
+     dance-single:
+     foo:
+     Beginner:
+     3:
+     0.000,0.000,0.000,0.000,0.000:
+0000
+0000
+0020
+0400
+,
+0300
+0002
+0033
+0000
+;
+'''
+
+
+def test_serialize_chart_hold_long():
+    chart = models.Chart()
+    chart.author = 'foo'
+    chart.difficulty = 'Beginner'
+    chart.rating = 3
+
+    first_measure = models.Measure(
+        time=0.00,
+        bpms=[(0.00, 240.00)],
+        rows=4
+    )
+    first_measure.notes.append(Hold(
+        position=Hold.POSITION_DOWN,
+        note_type=Hold.TYPE_ROLL,
+        offset=3,
+        duration=0.25
+    ))
+    first_measure.notes.append(Hold(
+        position=Hold.POSITION_UP,
+        note_type=Hold.TYPE_HOLD,
+        offset=2,
+        duration=1.0
+    ))
+    second_measure = models.Measure(
+        time=1.00,
+        bpms=[(0.00, 240.00)],
+        rows=4
+    )
+    second_measure.notes.append(Hold(
+        position=Hold.POSITION_RIGHT,
+        note_type=Hold.TYPE_HOLD,
+        offset=1,
+        duration=0.25
+    ))
+
+    chart.measures.append(first_measure)
+    chart.measures.append(second_measure)
+
+    assert serialize.serialize_chart(chart) == CHART_HOLD_LONG

@@ -26,9 +26,9 @@ class Chart(Model):
     '''
 
     def init_fields(self):
-        self.author = None
-        self.difficulty = None
-        self.rating = None
+        self.author = ''
+        self.difficulty = ''
+        self.rating = 3
 
         self.measures = []
 
