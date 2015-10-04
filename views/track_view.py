@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QGridLayout, QPushButton, QSlider
-from PyQt5.QtGui import QPainter, QPen, QBrush
-from PyQt5.QtCore import Qt
-from models import Chart
-
+from PyQt5.QtGui import QPainter, QPen, QBrush, QPixmap
+from PyQt5.QtCore import Qt, QRect
+from models import Chart, Note
+from .arrow_label import MarchArrowLabel
 
 INTERVAL_SPACING = 100
 
@@ -19,20 +19,23 @@ class MarchTrackView(QWidget):
 	def initUI(self):
 		self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-		#updateButton = QPushButton(self)
-		#updateButton.clicked.connect(self.buttonClick)
 		scale = QSlider(Qt.Vertical, self)
 		scale.valueChanged.connect(self.intervalChangeEvent)
 		scale.setMinimum(4)
 		scale.setMaximum(192)
 		scale.setTickInterval(4)
 
+		leftArrow = MarchArrowLabel(Note.POSITION_LEFT, self)
+		downArrow = MarchArrowLabel(Note.POSITION_DOWN, self)
+		upArrow = MarchArrowLabel (Note.POSITION_UP, self)
+		rightArrow = MarchArrowLabel(Note.POSITION_RIGHT, self)
 
 		self.layout = QVBoxLayout()
-		#self.layout.addWidget(updateButton)
-		#updateButton.show()
+		self.layout.addWidget(leftArrow)
+		self.layout.addWidget(downArrow)
+		self.layout.addWidget(upArrow)
+		self.layout.addWidget(rightArrow)
 		self.layout.addWidget(scale)
-
 
 		self.setLayout(self.layout)
 		self.updateGeometry()
@@ -48,7 +51,7 @@ class MarchTrackView(QWidget):
 
 		brush = QBrush(Qt.red, Qt.SolidPattern)
 		qp.setBrush(brush)
-		qp.drawRect(self.rect())
+	#	qp.drawRect(self.rect())
 
 		pen = QPen(Qt.black, 2, Qt.SolidLine)
 		qp.setPen(pen)
