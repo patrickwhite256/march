@@ -15,7 +15,7 @@ FIELD_LABEL_MAP = {
 
 NUMERIC_FIELDS = ['offset', 'sample_st', 'sample_len']
 
-COMMENT_RE = re.compile('\s*(\/\/.*)?')  # strip whitespace and comments
+COMMENT_RE = re.compile('\s*(\/\/.*)?$')  # strip whitespace and comments
 
 
 def parse_song(song_file):

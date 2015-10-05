@@ -7,14 +7,14 @@ PROPERTIES_TEMPLATE = """#TITLE:{title};
 #SUBTITLETRANSLIT:;
 #ARTISTTRANSLIT:;
 #CREDIT:;
-#BANNER:foo.png;
-#BACKGROUND:bar.png;
+#BANNER:{banner};
+#BACKGROUND:{bg};
 #LYRICSPATH:;
 #CDTITLE:./CDTITLES/Dancing Stage SuperNOVA.png;
-#MUSIC:foo.ogg;
-#OFFSET:{offset};
-#SAMPLESTART:{sample_st};
-#SAMPLELENGTH:{sample_len};
+#MUSIC:{music};
+#OFFSET:{offset:.3f};
+#SAMPLESTART:{sample_st:.3f};
+#SAMPLELENGTH:{sample_len:.3f};
 #SELECTABLE:YES;
 #DISPLAYBPM:{bpms};
 #STOPS:;
@@ -67,9 +67,15 @@ def serialize_chart(chart):
         for note in measure.notes:
             measures[i][note.offset][note.position] = note.note_type
             if note.note_type in models.Hold.TYPES:
-                target_measure_index = int(i + note.offset / measure.rows + note.duration)
+                measure_offset = note.offset / measure.rows + note.duration
+                if measure_offset <= 1:
+                    target_measure_index = i
+                else:
+                    target_measure_index = i + int(measure_offset)
                 target_measure = chart.measures[target_measure_index]
-                target_offset = round(((note.offset / measure.rows + note.duration) % 1) * target_measure.rows)
+                target_offset = round(
+                    ((measure_offset - 1/target_measure.rows) % 1) * target_measure.rows
+                )
                 measures[target_measure_index][target_offset][note.position] = models.Note.TYPE_END
     notes = '\n,\n'.join(
         ['\n'.join(

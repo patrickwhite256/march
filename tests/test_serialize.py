@@ -19,8 +19,8 @@ PROPERTIES_STR = """#TITLE:Foo;
 #CDTITLE:./CDTITLES/Dancing Stage SuperNOVA.png;
 #MUSIC:foo.ogg;
 #OFFSET:1.337;
-#SAMPLESTART:133.7;
-#SAMPLELENGTH:13.37;
+#SAMPLESTART:133.700;
+#SAMPLELENGTH:13.370;
 #SELECTABLE:YES;
 #DISPLAYBPM:125.000-400.000;
 #STOPS:;
@@ -63,8 +63,8 @@ SONG_WITH_CHART = """#TITLE:Foo;
 #CDTITLE:./CDTITLES/Dancing Stage SuperNOVA.png;
 #MUSIC:foo.ogg;
 #OFFSET:1.337;
-#SAMPLESTART:133.7;
-#SAMPLELENGTH:13.37;
+#SAMPLESTART:133.700;
+#SAMPLELENGTH:13.370;
 #SELECTABLE:YES;
 #DISPLAYBPM:125.000-400.000;
 #STOPS:;
@@ -200,13 +200,13 @@ def test_serialize_chart_hold():
         position=Hold.POSITION_DOWN,
         note_type=Hold.TYPE_ROLL,
         offset=1,
-        duration=0.125
+        duration=0.25
     ))
     measure.notes.append(Hold(
         position=Hold.POSITION_UP,
         note_type=Hold.TYPE_HOLD,
         offset=2,
-        duration=0.5
+        duration=0.625
     ))
 
     chart.measures.append(measure)
@@ -247,13 +247,13 @@ def test_serialize_chart_hold_long():
         position=Hold.POSITION_DOWN,
         note_type=Hold.TYPE_ROLL,
         offset=3,
-        duration=0.25
+        duration=0.5
     ))
     first_measure.notes.append(Hold(
         position=Hold.POSITION_UP,
         note_type=Hold.TYPE_HOLD,
         offset=2,
-        duration=1.0
+        duration=1.25
     ))
     second_measure = models.Measure(
         time=1.00,
@@ -264,10 +264,67 @@ def test_serialize_chart_hold_long():
         position=Hold.POSITION_RIGHT,
         note_type=Hold.TYPE_HOLD,
         offset=1,
-        duration=0.25
+        duration=0.5
     ))
 
     chart.measures.append(first_measure)
     chart.measures.append(second_measure)
 
     assert serialize.serialize_chart(chart) == CHART_HOLD_LONG
+
+CHART_HOLD_LONG_DIFFERENT_LENS = '''#NOTES:
+     dance-single:
+     foo:
+     Beginner:
+     3:
+     0.000,0.000,0.000,0.000,0.000:
+0000
+2000
+0000
+3400
+,
+0300
+0000
+0000
+0000
+0000
+0000
+0000
+0000
+;
+'''
+
+
+def test_serialize_chart_hold_long_different_lens():
+    chart = models.Chart()
+    chart.author = 'foo'
+    chart.difficulty = 'Beginner'
+    chart.rating = 3
+
+    first_measure = models.Measure(
+        time=0.00,
+        bpms=[(0.00, 240.00)],
+        rows=4
+    )
+    first_measure.notes.append(Hold(
+        position=Hold.POSITION_DOWN,
+        note_type=Hold.TYPE_ROLL,
+        offset=3,
+        duration=0.375
+    ))
+    first_measure.notes.append(Hold(
+        position=Hold.POSITION_LEFT,
+        note_type=Hold.TYPE_HOLD,
+        offset=1,
+        duration=0.75
+    ))
+    second_measure = models.Measure(
+        time=1.00,
+        bpms=[(0.00, 240.00)],
+        rows=8
+    )
+
+    chart.measures.append(first_measure)
+    chart.measures.append(second_measure)
+
+    assert serialize.serialize_chart(chart) == CHART_HOLD_LONG_DIFFERENT_LENS
