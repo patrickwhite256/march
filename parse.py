@@ -54,7 +54,7 @@ def parse_song(song_file):
                 pass
 
     for chart in song.charts:
-        apply_bpms(chart, bpm_changes)
+        apply_bpms(chart, bpm_changes, song.offset)
 
     return song
 
@@ -118,13 +118,14 @@ def parse_chart(chart_contents):
     return chart
 
 
-def apply_bpms(chart, bpm_changes):
+def apply_bpms(chart, bpm_changes, offset):
     """
     Applies a list of BPM changes to a chart.
     Calculates and applies the 'time' field of measures
 
     :param chart: a models.Chart object
     :param bpm_changes: a list of bpm changes, in the format "t.ttt=b.bbb", sorted by time
+    :param offset: the offset, in seconds, from the time of the start of the song
     """
 
     bpms = [{'start_time': float(b.split('=')[0]), 'bpm': float(b.split('=')[1])} for b in bpm_changes]
@@ -132,7 +133,7 @@ def apply_bpms(chart, bpm_changes):
     bpm_it = iter(bpms)
     current_bpm, next_bpm = next(bpm_it), next(bpm_it, None)
 
-    time = 0
+    time = -offset
     for measure in chart.measures:
         measure.time = time
         if next_bpm is not None and next_bpm['start_time'] == time:
