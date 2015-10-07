@@ -1,97 +1,81 @@
-#!/usr/bin/env python
-
-#
-# Testing audio
-#
-
 from PyQt5.QtGui import QDoubleValidator
-from PyQt5.QtCore import pyqtSignal, QUrl, QFile, QFileInfo, QTime, QDir
+from PyQt5.QtCore import pyqtSignal, QUrl, QFile, QFileInfo, QTime, QDir, QRect
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QGridLayout,
-        QVBoxLayout, QHBoxLayout, QToolButton, QLineEdit, QFileDialog)
+        QVBoxLayout, QHBoxLayout, QToolButton, QLineEdit, QFileDialog,
+        QSizePolicy, QFrame)
 
 
-# *
-# This widget contains both the ogg file selector widget, and the
-# sample interval selector/player widget. Together they make...
-# MusicSampleWidget!!!
-# *
-class MusicSampleWidget(QWidget):
-    def __init__(self, parent=None):
-        super(MusicSampleWidget, self).__init__(parent)
+class MarchSongSelectView(QWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.initUI()
 
-        self.init_ui()
+    def initUI(self):
+        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.setContentsMargins(4, 4, 4, 4)  # just something smaller, imo
+        self.setMaximumHeight(384)  # 768/3
+        self.setMaximumWidth(256)  # 1024/4
 
-    def init_ui(self):
-        song_select = SongSelectWidget()
-        interval_edit = IntervalEditWidget()
+        songSelect = SongSelectWidget()
+        intervalEdit = IntervalEditWidget()
 
-        song_select.new_song_selected.connect(interval_edit.new_song)
+        songSelect.newSongSelected.connect(intervalEdit.newSong)
 
         layout = QVBoxLayout()
-        layout.addWidget(song_select)
-        layout.addWidget(interval_edit)
+        layout.addWidget(songSelect)
+        layout.addWidget(intervalEdit)
         self.setLayout(layout)
 
 
-# *
-# This widget contains a file selector button to bring up a dialog,
-# and a label indicating the current song.
-# *
+class MarchSongSelectFrame(QFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.initUI()
+        self.setFrameStyle(QFrame.Box)
+        self.addWidget(MarchSongSelectView())
+
+
 class SongSelectWidget(QWidget):
 
-    new_song_selected = pyqtSignal(['QFile'])
+    newSongSelected = pyqtSignal(['QFile'])
 
     def __init__(self, parent=None):
         super(SongSelectWidget, self).__init__(parent)
 
-        self.audio_file = QFile()
-        self.init_dialog()
-        self.init_ui()
+        self.audioFile = QFile()
+        self.initDialog()
+        self.initUI()
 
-    def init_dialog(self):
-        self.file_dialog = QFileDialog(
-            fileSelected=self.set_audio_file
-        )
-        self.file_dialog.setNameFilter("Ogg Audio (*.ogg)")
-        self.file_dialog.selectFile(
-            self.audio_file.fileName()
-        )
+    def initDialog(self):
+        self.fileDialog = QFileDialog(fileSelected=self.setAudioFile)
+        self.fileDialog.setNameFilter("Ogg Audio (*.ogg)")
+        self.fileDialog.selectFile(self.audioFile.fileName())
 
-    def init_ui(self):
-        self.file_button = QToolButton(
-            clicked=self.open_dialog
-        )
-        self.file_button.setText("Select New Audio File")
-        short_name = QFileInfo(self.audio_file).fileName()
-        self.nameLabel = QLabel(
-            "File: " + short_name
-        )
+    def initUI(self):
+        self.fileButton = QToolButton(clicked=self.openDialog)
+        self.fileButton.setText("Select New Audio File")
+        shortName = QFileInfo(self.audioFile).fileName()
+        self.nameLabel = QLabel("File: " + shortName)
 
         layout = QVBoxLayout()
-        layout.addWidget(self.file_button)
+        layout.addWidget(self.fileButton)
         layout.addWidget(self.nameLabel)
         self.setLayout(layout)
 
-    def open_dialog(self):
-        self.file_dialog.exec()
+    def openDialog(self):
+        self.fileDialog.exec()
 
-    def set_audio_file(self, file_path):
-        self.audio_file = QFile(file_path)
-        short_name = QFileInfo(self.audio_file).fileName()
-        self.nameLabel.setText(
-            "File: " + short_name
-        )
-        self.new_song_selected.emit(self.audio_file)
+    def setAudioFile(self, filePath):
+        self.audioFile = QFile(filePath)
+        shortName = QFileInfo(self.audioFile).fileName()
+        self.nameLabel.setText("File: " + shortName)
+        self.newSongSelected.emit(self.audioFile)
 
-    def get_audio_file():
-        return self.audio_file
+    def getAudioFile():
+        return self.audioFile
 
 
-# *
-# IntervalEditWidget. Given an ogg file, play the interval specified.
-# No special rules as of yet, really.
-# *
 class IntervalEditWidget(QWidget):
 
     play_interval = pyqtSignal()
@@ -106,27 +90,30 @@ class IntervalEditWidget(QWidget):
         # when in StoppedState
         self.playerState = QMediaPlayer.StoppedState
 
-        self.init_ui()
-        self.init_player()
+        self.initUI()
+        self.initPlayer()
 
-    def init_ui(self):
-        mainLayout = QGridLayout()
+    def initUI(self):
+        mainLayout = QVBoxLayout()
 
-        self.init_buttons()
+        self.initButtons()
 
         buttonLayout = QHBoxLayout()
         buttonLayout.addWidget(self.playButton)
         buttonLayout.addWidget(self.stopButton)
         buttonLayout.addWidget(self.intervalButton)
-        mainLayout.addLayout(buttonLayout, 0, 0)
-        mainLayout.addWidget(self.startLabel, 1, 0)
-        mainLayout.addWidget(self.endLabel, 1, 1)
-        mainLayout.addWidget(self.startTime, 2, 0)
-        mainLayout.addWidget(self.endTime, 2, 1)
+        mainLayout.addLayout(buttonLayout)
+
+        labelLayout = QGridLayout()
+        labelLayout.addWidget(self.startLabel, 1, 0)
+        labelLayout.addWidget(self.endLabel, 1, 1)
+        labelLayout.addWidget(self.startTime, 2, 0)
+        labelLayout.addWidget(self.endTime, 2, 1)
+        mainLayout.addLayout(labelLayout)
 
         self.setLayout(mainLayout)
 
-    def init_buttons(self):
+    def initButtons(self):
         self.playButton = QToolButton(clicked=self.playPressed)
         self.playButton.setText("play")
 
@@ -146,23 +133,23 @@ class IntervalEditWidget(QWidget):
         self.endTime.setValidator(QDoubleValidator())
         self.endTime.setText('0.0')
 
-    def init_player(self):
+    def initPlayer(self):
         self.timeLabel = QLabel("")
 
-        self.media_player = QMediaPlayer()
-        self.media_player.setNotifyInterval(17)  # ms ie. ~60hz
-        self.media_player.stop()
+        self.mediaPlayer = QMediaPlayer()
+        self.mediaPlayer.setNotifyInterval(17)  # ms ie. ~60hz
+        self.mediaPlayer.stop()
         self.playlist = QMediaPlaylist()
-        self.media_player.setPlaylist(self.playlist)
-        self.media_player.pause()
+        self.mediaPlayer.setPlaylist(self.playlist)
+        self.mediaPlayer.pause()
 
-        self.media_player.positionChanged.connect(self.positionChanged)
+        self.mediaPlayer.positionChanged.connect(self.positionChanged)
         self.intervalEnd = None  # initialize this
 
-        self.setState(self.media_player.state())
-        self.play.connect(self.media_player.play)
-        self.pause.connect(self.media_player.pause)
-        self.stop.connect(self.media_player.stop)
+        self.setState(self.mediaPlayer.state())
+        self.play.connect(self.mediaPlayer.play)
+        self.pause.connect(self.mediaPlayer.pause)
+        self.stop.connect(self.mediaPlayer.stop)
         self.play_interval.connect(self.playInterval)
 
     def state(self):
@@ -180,10 +167,10 @@ class IntervalEditWidget(QWidget):
     def getInterval(self):
         return float(self.startTime.text()), float(self.endTime.text())
 
-    def new_song(self, new_file):
+    def newSong(self, newFile):
         self.playlist.clear()
-        media_content = QMediaContent(QUrl("file:"+new_file.fileName()))
-        self.playlist.addMedia(media_content)
+        mediaContent = QMediaContent(QUrl("file:"+newFile.fileName()))
+        self.playlist.addMedia(mediaContent)
 
     def playPressed(self):
         if self.playerState == QMediaPlayer.PlayingState:
@@ -225,25 +212,10 @@ class IntervalEditWidget(QWidget):
         self.timeLabel.setText(tStr)
 
     def playInterval(self):
-        # remember, position is in milliseconds and always accessible
-        # self.media_player.position
-        # first we need the start and duration
         start, duration = self.getInterval()
         start = start * 1000
         duration = duration * 1000
         self.intervalEnd = start + duration
-        self.media_player.setPosition(start)
-        self.media_player.play()
+        self.mediaPlayer.setPosition(start)
+        self.mediaPlayer.play()
         self.setState(QMediaPlayer.PlayingState)
-
-
-if __name__ == '__main__':
-
-    import sys
-
-    app = QApplication(sys.argv)
-
-    music_info_w = MusicSampleWidget()
-    music_info_w.show()
-
-    sys.exit(app.exec_())
