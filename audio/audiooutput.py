@@ -4,6 +4,7 @@
 # Testing audio
 #
 
+from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtCore import pyqtSignal, QUrl, QFile, QFileInfo, QTime, QDir
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QGridLayout,
@@ -90,7 +91,6 @@ class SongSelectWidget(QWidget):
 # *
 # IntervalEditWidget. Given an ogg file, play the interval specified.
 # No special rules as of yet, really.
-# TODO -> Needs to be made a mix of Audio Control + Audio Player
 # *
 class IntervalEditWidget(QWidget):
 
@@ -114,18 +114,17 @@ class IntervalEditWidget(QWidget):
 
         self.init_buttons()
 
-        stdButtonLayout = QHBoxLayout()
-        stdButtonLayout.addWidget(self.playButton)
-        stdButtonLayout.addWidget(self.stopButton)
-        stdButtonLayout.addWidget(self.intervalButton)
-        mainLayout.addLayout(stdButtonLayout, 0, 0)
+        buttonLayout = QHBoxLayout()
+        buttonLayout.addWidget(self.playButton)
+        buttonLayout.addWidget(self.stopButton)
+        buttonLayout.addWidget(self.intervalButton)
+        mainLayout.addLayout(buttonLayout, 0, 0)
         mainLayout.addWidget(self.startLabel, 1, 0)
         mainLayout.addWidget(self.endLabel, 1, 1)
         mainLayout.addWidget(self.startTime, 2, 0)
         mainLayout.addWidget(self.endTime, 2, 1)
 
         self.setLayout(mainLayout)
-        self.setWindowTitle("Audio Player???")
 
     def init_buttons(self):
         self.playButton = QToolButton(clicked=self.playPressed)
@@ -137,21 +136,18 @@ class IntervalEditWidget(QWidget):
         self.intervalButton = QToolButton(clicked=self.intervalPressed)
         self.intervalButton.setText("play interval")
 
-        # TODO validators on these fields.
-        # - ints (or floats? they should have decimals)
-        # - not greater than song length
-        # - not less than 0
         self.startLabel = QLabel("Start Time (s):")
         self.startTime = QLineEdit()
+        self.startTime.setValidator(QDoubleValidator())
         self.startTime.setText('0.0')
 
         self.endLabel = QLabel("Duration (s):")
         self.endTime = QLineEdit()
+        self.endTime.setValidator(QDoubleValidator())
         self.endTime.setText('0.0')
 
     def init_player(self):
-        # TODO replace with file selector (happening)
-        self.timeLabel = QLabel(" ___ ")
+        self.timeLabel = QLabel("")
 
         self.media_player = QMediaPlayer()
         self.media_player.setNotifyInterval(17)  # ms ie. ~60hz
@@ -224,7 +220,7 @@ class IntervalEditWidget(QWidget):
             tStr = currentTime.toString(format)
             self.timeLabel.setText(tStr)
         else:
-            tStr = " ___ "
+            tStr = ""
 
         self.timeLabel.setText(tStr)
 
