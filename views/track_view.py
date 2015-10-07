@@ -98,7 +98,6 @@ class MarchTrackView(QWidget):
 
 		self.column = min(int((x - 100) / ARROW_SPACING), 3)
 		self.row = int((y + INTERVAL_SPACING / 2) / (self.interval * INTERVAL_SPACING))
-		print(self.row)
 
 		self.update()
 		
