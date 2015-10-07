@@ -71,7 +71,7 @@ class Measure(Model):
         rows: number of rows in this measure
         notes: list of notes in this measure
         time: time (in seconds) between the start of the song and the start of this measure
-        bpms: list of 2-tuples (time in seconds from start of measure, bpm) of
+        bpms: list of 2-tuples (row offset from start of measure, bpm) of
               bpm changes in this measure.
               must have at least 1 specifying the initial bpm of the measure
     '''

@@ -37,7 +37,7 @@ def song():
         banner='foo.png',
         bg='bar.png',
         music='foo.ogg',
-        offset=1.337,
+        offset=0,
         sample_st=133.7,
         sample_len=13.37,
         bpms='125.000-400.000'
@@ -62,7 +62,7 @@ SONG_WITH_CHART = """#TITLE:Foo;
 #LYRICSPATH:;
 #CDTITLE:./CDTITLES/Dancing Stage SuperNOVA.png;
 #MUSIC:foo.ogg;
-#OFFSET:1.337;
+#OFFSET:0.000;
 #SAMPLESTART:133.700;
 #SAMPLELENGTH:13.370;
 #SELECTABLE:YES;
@@ -111,15 +111,17 @@ def test_collect_bpms():
     chart = models.Chart()
     chart.measures.append(models.Measure(
         time=0.00,
-        bpms=[(0.00, 240.00)]
+        bpms=[(0.00, 240.00)],
+        rows=4
     ))
     chart.measures.append(models.Measure(
         time=1.00,
-        bpms=[(0.00, 240.00), (0.5, 120.00)]
+        bpms=[(0.00, 240.00), (2, 120.00)],
+        rows=4
     ))
     bpm_string = serialize.collect_bpms(chart)
 
-    assert bpm_string == '0.000=240.000,1.500=120.000'
+    assert bpm_string == '0.000=240.000,2.000=120.000'
 
 
 CHART_SIMPLE = '''#NOTES:

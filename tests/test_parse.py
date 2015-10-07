@@ -251,20 +251,20 @@ def test_apply_bpms_basic(basic_chart):
 
 
 def test_apply_bpms_change(basic_chart):
-    bpm_changes = ['0.0=240.00', '1.5=120.00']
+    bpm_changes = ['0.0=240.00', '6.0=120.00']
     parse.apply_bpms(basic_chart, bpm_changes, 0)
 
     assert basic_chart.measures[0].duration() == 1
     assert basic_chart.measures[0].bpms == [(0, 240)]
     assert basic_chart.measures[1].duration() == 1.5
-    assert basic_chart.measures[1].bpms == [(0, 240), (0.5, 120)]
+    assert basic_chart.measures[1].bpms == [(0, 240), (2, 120)]
     for i in range(2, N_MEASURES):
         assert basic_chart.measures[i].duration() == 2
         assert basic_chart.measures[i].bpms == [(0, 120)]
 
 
 def test_apply_bpms_change_on_measure(basic_chart):
-    bpm_changes = ['0.0=240.00', '1=120.00']
+    bpm_changes = ['0.0=240.00', '4.0=120.00']
     parse.apply_bpms(basic_chart, bpm_changes, 0)
 
     assert basic_chart.measures[0].bpms == [(0, 240)]

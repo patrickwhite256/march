@@ -124,7 +124,7 @@ def apply_bpms(chart, bpm_changes, offset):
     Calculates and applies the 'time' field of measures
 
     :param chart: a models.Chart object
-    :param bpm_changes: a list of bpm changes, in the format "t.ttt=b.bbb", sorted by time
+    :param bpm_changes: a list of bpm changes, in the format "b.bbb=b.bbb", sorted by the first element
     :param offset: the offset, in seconds, from the time of the start of the song
     """
 
