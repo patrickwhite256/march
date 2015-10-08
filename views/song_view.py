@@ -28,14 +28,6 @@ class MarchSongSelectView(QWidget):
         self.setLayout(layout)
 
 
-class MarchSongSelectFrame(QFrame):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.initUI()
-        self.setFrameStyle(QFrame.Box)
-        self.addWidget(MarchSongSelectView())
-
-
 class SongSelectWidget(QWidget):
 
     newSongSelected = pyqtSignal(['QFile'])
@@ -170,11 +162,14 @@ class IntervalEditWidget(QWidget):
         mediaContent = QMediaContent(QUrl("file:"+newFile.fileName()))
         self.playlist.addMedia(mediaContent)
 
+    # PROBLEM/TODO: segfault when close after pressing play to start song?
     def playPressed(self):
         if self.playerState == QMediaPlayer.PlayingState:
+            self.playButton.setIcon(QIcon.fromTheme("media-playback-start"))
             self.setState(QMediaPlayer.PausedState)
             self.pause.emit()
         else:
+            self.playButton.setIcon(QIcon.fromTheme("media-playback-pause"))
             self.setState(QMediaPlayer.PlayingState)
             self.play.emit()
 
@@ -186,6 +181,8 @@ class IntervalEditWidget(QWidget):
         if not self.playerState == QMediaPlayer.StoppedState:
             print("player not stopped, won't play interval")
             return
+        #  TODO make these into a function
+        self.playButton.setIcon(QIcon.fromTheme("media-playback-pause"))
         self.setState(QMediaPlayer.PlayingState)
         self.play_interval.emit()
 
