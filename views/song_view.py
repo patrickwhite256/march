@@ -1,4 +1,4 @@
-from PyQt5.QtGui import QDoubleValidator
+from PyQt5.QtGui import QDoubleValidator, QIcon
 from PyQt5.QtCore import pyqtSignal, QUrl, QFile, QFileInfo, QTime, QDir, QRect
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QGridLayout,
@@ -13,9 +13,9 @@ class MarchSongSelectView(QWidget):
 
     def initUI(self):
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        self.setContentsMargins(4, 4, 4, 4)  # just something smaller, imo
+        self.setContentsMargins(2, 2, 2, 2)  # just something smaller, imo
         self.setMaximumHeight(384)  # 768/3
-        self.setMaximumWidth(256)  # 1024/4
+        self.setMaximumWidth(224)  # 1024/4 ( accually, less is better )
 
         songSelect = SongSelectWidget()
         intervalEdit = IntervalEditWidget()
@@ -86,8 +86,6 @@ class IntervalEditWidget(QWidget):
     def __init__(self, parent=None):
         super(IntervalEditWidget, self).__init__(parent)
 
-        # TODO Make player support StoppedState, interval player only available
-        # when in StoppedState
         self.playerState = QMediaPlayer.StoppedState
 
         self.initUI()
@@ -115,13 +113,13 @@ class IntervalEditWidget(QWidget):
 
     def initButtons(self):
         self.playButton = QToolButton(clicked=self.playPressed)
-        self.playButton.setText("play")
+        self.playButton.setIcon(QIcon.fromTheme("media-playback-start"))
 
         self.stopButton = QToolButton(clicked=self.stopPressed)
-        self.stopButton.setText("stop")
+        self.stopButton.setIcon(QIcon.fromTheme("media-playback-stop"))
 
         self.intervalButton = QToolButton(clicked=self.intervalPressed)
-        self.intervalButton.setText("play interval")
+        self.intervalButton.setText("Play Sample")
 
         self.startLabel = QLabel("Start Time (s):")
         self.startTime = QLineEdit()
@@ -131,7 +129,7 @@ class IntervalEditWidget(QWidget):
         self.endLabel = QLabel("Duration (s):")
         self.endTime = QLineEdit()
         self.endTime.setValidator(QDoubleValidator())
-        self.endTime.setText('0.0')
+        self.endTime.setText('12.0')  # default time: 12s, standard
 
     def initPlayer(self):
         self.timeLabel = QLabel("")
