@@ -43,6 +43,12 @@ Setup Directions
 - PyQt Installation - follow http://pyqt.sourceforge.net/Docs/PyQt5/installation.html
  - You may also have to install Qt 5.4.1. You can get it here http://www.qt.io/download-open-source/
 
+Windows Setup:
+
+- Binary installation only works with Python 3.4, make sure the dev environment is Python 3.4
+- Download the relevant binary package here: https://riverbankcomputing.com/software/pyqt/download5
+- Follow the instructions on the installer
+- Congratulations, you have PyQt5!
 
 | Must-Haves               | Nice-to-haves       |
 |--------------------------|---------------------|
