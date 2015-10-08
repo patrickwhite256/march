@@ -128,19 +128,21 @@ def apply_bpms(chart, bpm_changes, offset):
     :param offset: the offset, in seconds, from the time of the start of the song
     """
 
-    bpms = [{'start_time': float(b.split('=')[0]), 'bpm': float(b.split('=')[1])} for b in bpm_changes]
+    bpms = [{'start_beats': float(b.split('=')[0]), 'bpm': float(b.split('=')[1])} for b in bpm_changes]
 
     bpm_it = iter(bpms)
     current_bpm, next_bpm = next(bpm_it), next(bpm_it, None)
 
     time = -offset
+    beats = 0
     for measure in chart.measures:
         measure.time = time
-        if next_bpm is not None and next_bpm['start_time'] == time:
+        if next_bpm is not None and next_bpm['start_beats'] == beats:
             current_bpm, next_bpm = next_bpm, next(bpm_it, None)
         measure.bpms.append((0, current_bpm['bpm']))
 
-        while next_bpm is not None and time + measure.duration() > next_bpm['start_time']:
-            measure.bpms.append((next_bpm['start_time'] - time, next_bpm['bpm']))
+        while next_bpm is not None and next_bpm['start_beats'] < beats + 4:
+            measure.bpms.append((next_bpm['start_beats'] - beats, next_bpm['bpm']))
             current_bpm, next_bpm = next_bpm, next(bpm_it, None)
         time = round(time + measure.duration(), 6)  # minimize fp error
+        beats += 4

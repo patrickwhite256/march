@@ -94,10 +94,9 @@ class Measure(Model):
         total_beats = 0
         for i, bpm in enumerate(self.bpms[1:]):
             prev_bpm = self.bpms[i]
-            time_diff = bpm[0] - prev_bpm[0]
-            duration += time_diff
-            beats = time_diff * prev_bpm[1] / 60  # b = s * b/min / (60 s/min)
-            total_beats += beats
+            beat_diff = bpm[0] - prev_bpm[0]
+            total_beats += beat_diff
+            duration += (beat_diff * 60) / prev_bpm[1]
         duration += (4 - total_beats) * 60 / self.bpms[-1][1]  # account for last bpm section
 
         return duration

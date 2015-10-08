@@ -18,7 +18,7 @@ PROPERTIES_STR = """#TITLE:Foo;
 #LYRICSPATH:;
 #CDTITLE:./CDTITLES/Dancing Stage SuperNOVA.png;
 #MUSIC:foo.ogg;
-#OFFSET:1.337;
+#OFFSET:0.000;
 #SAMPLESTART:133.700;
 #SAMPLELENGTH:13.370;
 #SELECTABLE:YES;
@@ -121,7 +121,7 @@ def test_collect_bpms():
     ))
     bpm_string = serialize.collect_bpms(chart)
 
-    assert bpm_string == '0.000=240.000,2.000=120.000'
+    assert bpm_string == '0.000=240.000,6.000=120.000'
 
 
 CHART_SIMPLE = '''#NOTES:

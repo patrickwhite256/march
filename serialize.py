@@ -89,22 +89,22 @@ def serialize_chart(chart):
 
 def collect_bpms(chart):
     """
-    Serialize all the BPM changes in a song into the format 't.ttt=b.bbb,t.ttt=b.bbb'
+    Serialize all the BPM changes in a song into the format 'b.bbb=b.bbb,b.bbb=b.bbb'
 
     :param chart: a models.Chart object with at least one models.Measure
 
-    :return: a string of the format 't.ttt=b.bbb,t.ttt=b.bbb'
+    :return: a string of the format 'b.bbb=b.bbb,b.bbb=b.bbb'
     """
 
     bpm_strings = []
 
-    current_time, current_bpm = chart.measures[0].bpms[0]
+    current_beat, current_bpm = chart.measures[0].bpms[0]
     bpm_strings.append(BPM_STRING_FORMAT.format(0, current_bpm))
     for measure in chart.measures:
-        for time, bpm in measure.bpms:
+        for beat, bpm in measure.bpms:
             if bpm != current_bpm:
                 current_bpm = bpm
-                bpm_strings.append(BPM_STRING_FORMAT.format(current_time + time, current_bpm))
-        current_time += measure.duration()
+                bpm_strings.append(BPM_STRING_FORMAT.format(current_beat + beat, current_bpm))
+        current_beat += 4
 
     return ','.join(bpm_strings)
