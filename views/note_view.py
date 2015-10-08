@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QFrame, QHBoxLayout, QVBoxLayout, QSizePoli
 	
 class MarchNoteView(QWidget):
 	def __init__(self, parent):
-		super(MarchNoteView, self).__init__(parent)
+		super().__init__(parent)
 		self.initUI()
 
 	def initUI(self):

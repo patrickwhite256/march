@@ -9,12 +9,12 @@ import models
 
 class MarchSideBarView(QFrame):
 	def __init__(self, parent):
-		super(MarchSideBarView, self).__init__(parent)
+		super().__init__(parent)
 		self.initUI()
 	
 	def initUI(self):
 		self.setFrameStyle(QFrame.Box)
-		self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 		self.layout = QVBoxLayout()
 
 		self.setLayout(self.layout)
@@ -27,7 +27,7 @@ class MarchSideBarView(QFrame):
 class MarchWindow(QWidget):
 	
 	def __init__(self, songFile):
-		super(MarchWindow, self).__init__()
+		super().__init__()
 
 		self.model = models.Song()
 		if(songFile is not None):
@@ -48,7 +48,7 @@ class MarchWindow(QWidget):
 		leftSideBar.addView(navView)
 
 		trackView = MarchTrackView(self, self.model.charts[0])
-		
+
 		rightSideBar = MarchSideBarView(self)
 		noteView = MarchNoteView(rightSideBar)
 
@@ -59,7 +59,9 @@ class MarchWindow(QWidget):
 		layout.addWidget(rightSideBar, 0, 4)
 
 		trackView.show()
-		
+		trackView.update()
+		self.update()
+
 		self.setWindowTitle("March")
 		self.setGeometry(0, 0, 1024, 768)
 		self.setLayout(layout)

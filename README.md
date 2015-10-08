@@ -1,7 +1,7 @@
 March
 =====
 
-[![Build Status](https://magnum.travis-ci.com/patrickwhite256/march.svg?token=Urtvk4fuxUP8Zg5qkWzT)](https://magnum.travis-ci.com/patrickwhite256/march)
+[![Build Status](https://magnum.travis-ci.com/patrickwhite256/march.svg?token=Urtvk4fuxUP8Zg5qkWzT&branch=ui)](https://magnum.travis-ci.com/patrickwhite256/march)
 
 A Stepmania chart editor. Created as the Internal Mini-Project component of SE390.
 
