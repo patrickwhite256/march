@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt, QRect
 from models import Chart, Note
 from .arrow_label import MarchArrowLabel
 
-INTERVAL_SPACING = 10
+INTERVAL_SPACING = 40
 ARROW_SPACING = 80
 
 class MarchTrackView(QWidget):
@@ -30,6 +30,7 @@ class MarchTrackView(QWidget):
 		scale.setMinimum(4)
 		scale.setMaximum(192)
 		scale.setTickInterval(4)
+		scale.setSingleStep(4)
 
 		leftArrow = MarchArrowLabel(Note.POSITION_LEFT, self)
 		leftArrow.move(90, 50)
@@ -62,14 +63,31 @@ class MarchTrackView(QWidget):
 		brush = QBrush(Qt.red, Qt.SolidPattern)
 		qp.setBrush(brush)
 
-		for i, measure in enumerate(self.model.measures):
-			if (i == self.row):
-				qp.setPen(QPen(Qt.red, 4, Qt.SolidLine))
-			else:
-				qp.setPen(QPen(Qt.black, 2, Qt.SolidLine))	
+		qpen = QPen()
+
+		for measure_index, measure in enumerate(self.model.measures):
+
+			for beat_index in range(self.interval):
+
+				current_beat = measure_index * self.interval + beat_index	
+
+				if (beat_index == 0):
+					qpen.setStyle(Qt.SolidLine)
+					qpen.setWidth(2)
+				else:
+					qpen.setStyle(Qt.DashLine)
+					qpen.setWidth(1)
+
+				if (current_beat == self.row):
+					qpen.setColor(Qt.red)
+					qpen.setWidth(qpen.width() * 2)
+				else:
+					qpen.setColor(Qt.black)
+
+				qp.setPen(qpen)
 			
-			y = i * self.interval * INTERVAL_SPACING
-			qp.drawLine(100, y, 400, y)
+				y = current_beat * INTERVAL_SPACING
+				qp.drawLine(100, y, 400, y)
 			
 		
 		if(self.column > -1):
@@ -78,6 +96,17 @@ class MarchTrackView(QWidget):
 
 			qp.drawLine(columnStart, 0, columnStart, self.height())
 			qp.drawLine(columnEnd, 0, columnEnd, self.height())
+
+
+	def drawNotes(self, qp):
+		for measure_index, measure in enumerate(self.model.measures):
+			note_interval = len(measure.notes) / self.interval
+			measure_offset = INTERVAL_SPACING * self.interval * measure_index
+
+			for note in measure.notes:
+				arrow = MarchArrowLabel(note.position)
+				note_voffset = note.offset * note_interval
+				note_hoffset = 100 + ARROW_SPACING * note.postion # hurray for enums
 
 
 	# Event Handlers
@@ -90,6 +119,7 @@ class MarchTrackView(QWidget):
 
 	def intervalChangeEvent(self, data):
 		self.interval = data
+		print(data)
 		self.update()
 
 	def mouseMoveEvent(self, event):
@@ -97,7 +127,7 @@ class MarchTrackView(QWidget):
 		y = event.pos().y()
 
 		self.column = min(int((x - 100) / ARROW_SPACING), 3)
-		self.row = int((y + INTERVAL_SPACING / 2) / (self.interval * INTERVAL_SPACING))
+		self.row = int(y / INTERVAL_SPACING)
 
 		self.update()
 		
