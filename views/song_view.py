@@ -68,6 +68,7 @@ class SongSelectWidget(QWidget):
         return self.audioFile
 
 
+# TODO - actually clean up what needs to be self.x vs. just x
 class IntervalEditWidget(QWidget):
 
     play_interval = pyqtSignal()
@@ -150,9 +151,9 @@ class IntervalEditWidget(QWidget):
             self.playerState = state
 
             if state == QMediaPlayer.PlayingState:
-                self.playButton.setText("pause")
+                self.playButton.setIcon(QIcon.fromTheme("media-playback-pause"))
             else:
-                self.playButton.setText("play")
+                self.playButton.setIcon(QIcon.fromTheme("media-playback-start"))
 
     def getInterval(self):
         return float(self.startTime.text()), float(self.endTime.text())
@@ -165,11 +166,9 @@ class IntervalEditWidget(QWidget):
     # PROBLEM/TODO: segfault when close after pressing play to start song?
     def playPressed(self):
         if self.playerState == QMediaPlayer.PlayingState:
-            self.playButton.setIcon(QIcon.fromTheme("media-playback-start"))
             self.setState(QMediaPlayer.PausedState)
             self.pause.emit()
         else:
-            self.playButton.setIcon(QIcon.fromTheme("media-playback-pause"))
             self.setState(QMediaPlayer.PlayingState)
             self.play.emit()
 
@@ -179,11 +178,7 @@ class IntervalEditWidget(QWidget):
 
     def intervalPressed(self):
         if not self.playerState == QMediaPlayer.StoppedState:
-            print("player not stopped, won't play interval")
             return
-        #  TODO make these into a function
-        self.playButton.setIcon(QIcon.fromTheme("media-playback-pause"))
-        self.setState(QMediaPlayer.PlayingState)
         self.play_interval.emit()
 
     def positionChanged(self, progress):
@@ -210,6 +205,9 @@ class IntervalEditWidget(QWidget):
         start, duration = self.getInterval()
         start = start * 1000
         duration = duration * 1000
+
+        # setting intervalEnd will cause it to check whether
+        # it's passed intervalEnd on positionChanged
         self.intervalEnd = start + duration
         self.mediaPlayer.setPosition(start)
         self.mediaPlayer.play()
