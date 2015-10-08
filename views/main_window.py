@@ -44,8 +44,8 @@ class MarchWindow(QWidget):
 		navView = MarchNavigationView(leftSideBar)
 
 		leftSideBar.addView(infoView)
-		leftSideBar.addView(songView)
 		leftSideBar.addView(navView)
+		leftSideBar.addView(songView)
 
 		trackView = MarchTrackView(self, self.model.charts[0])
         
