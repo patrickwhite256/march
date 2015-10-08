@@ -1,3 +1,4 @@
+from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QVBoxLayout,
         QHBoxLayout, QSizePolicy)
 
@@ -19,12 +20,14 @@ class MarchNavigationView(QWidget):
         barLayout = QHBoxLayout()
         self.barLabel = QLabel("Active Measure:")
         self.barBox = QLineEdit()
+        self.barBox.setValidator(QIntValidator())
         barLayout.addWidget(self.barLabel)
         barLayout.addWidget(self.barBox)
 
         beatLayout = QHBoxLayout()
         self.beatLabel = QLabel("Active Beat:")
         self.beatBox = QLineEdit()
+        self.beatBox.setValidator(QIntValidator())
         beatLayout.addWidget(self.beatLabel)
         beatLayout.addWidget(self.beatBox)
 
