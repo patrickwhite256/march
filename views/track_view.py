@@ -100,22 +100,17 @@ class MarchTrackView(QWidget):
             qp.drawLine(columnEnd, 0, columnEnd, self.height())
 
     def drawNotes(self, qp):
+
         for measure_index, measure in enumerate(self.model.measures):
-            # render only first 3 measures. let's figure this shit out.
-            # TODO/TESTING
-            # reader's note: testing with now_or_never.sm, only measure 2 has notes
-            # if measure_index == 2:
-            # print("measure index", measure_index)
+            # the vertical space between each 'row' for this measure (px)
             note_interval = INTERVAL_SPACING / (measure.rows / self.interval)
+            # the vertical space between each measure (px)
             measure_offset = INTERVAL_SPACING * self.interval * measure_index + self.top_offset
-            # print("measure_offset", measure_offset)
-            # print("note interval", note_interval)
 
             for note in measure.notes:
                 arrow = MarchArrowLabel(note.position, self)
+
                 note_voffset = measure_offset + note.offset * note_interval - ARROW_SIZE / 2
-                # TODO/TESTING here is where i am printing for now
-                # print(note.offset, note_voffset)
                 note_hoffset = 90 + ARROW_SPACING * note.position  # hurray for enums
 
                 source_rect = QRect(0, 0, ARROW_SPACING, ARROW_SPACING)
@@ -135,7 +130,6 @@ class MarchTrackView(QWidget):
     def intervalChangeEvent(self, data):
         self.interval = data
         print(data)
-        # KELLY TESTING TODO UNCOMMENT
         self.update()
 
     def mouseMoveEvent(self, event):
@@ -145,7 +139,6 @@ class MarchTrackView(QWidget):
         self.column = min(int((x - 100) / ARROW_SPACING), 3)
         self.row = int((y - self.top_offset) / INTERVAL_SPACING)
 
-        # KELLY TESTING TODO UNCOMMENT
         self.update()
 
     def mousePressEvent(self, event):
@@ -154,7 +147,6 @@ class MarchTrackView(QWidget):
         print(row_offset)
         selected_measure = self.model.measures[measure_index]
 
-        # TODO Put note existence search fn in model
         init_len = len(selected_measure.notes)
 
         selected_measure.notes[:] = [note for note in selected_measure.notes if (note.offset != row_offset or note.position != self.column)]
@@ -166,7 +158,6 @@ class MarchTrackView(QWidget):
             new_note.offset = row_offset
             selected_measure.notes.append(new_note)
 
-        # KELLY TESTING TODO UNCOMMENT
         self.update()
 
     def wheelEvent(self, event):
@@ -176,5 +167,4 @@ class MarchTrackView(QWidget):
             else:
                 self.top_offset -= 15
 
-        # KELLY TESTING TODO UNCOMMENT
         self.update()
