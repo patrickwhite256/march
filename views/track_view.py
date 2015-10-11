@@ -120,9 +120,15 @@ class MarchTrackView(QWidget):
     # Event Handlers
 
     def paintEvent(self, event):
-        # TODO Optimize to only draw the visble portion of the chart
         qp = QPainter()
         qp.begin(self)
+        # TODO Optimize to only draw the visible portion of the chart
+        # this is perhaps slowing down the "killer app" by a little.
+        # but this is NOT curing the disease!
+        # interval spacing * 16 is a bit overshoot for now
+        # arrow spacing * 4 is logical (columns), +2 is for the edges (or horizontal offset)
+        qp.setClipRect(0, 0, ARROW_SPACING*(4 + 2), INTERVAL_SPACING*16)
+        qp.setClipping(True)
         self.drawChart(qp)
         self.drawNotes(qp)
         qp.end()
