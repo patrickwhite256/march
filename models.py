@@ -26,9 +26,9 @@ class Chart(Model):
     '''
 
     def init_fields(self):
-        self.author = None
-        self.difficulty = None
-        self.rating = None
+        self.author = ''
+        self.difficulty = ''
+        self.rating = 3
 
         self.measures = []
 
@@ -51,6 +51,7 @@ class Song(Model):
 
     def init_fields(self):
         self.title = ''
+        self.artist = ''
         self.banner = ''
         self.bg = ''
         self.music = ''
@@ -70,7 +71,7 @@ class Measure(Model):
         rows: number of rows in this measure
         notes: list of notes in this measure
         time: time (in seconds) between the start of the song and the start of this measure
-        bpms: list of 2-tuples (time in seconds from start of measure, bpm) of
+        bpms: list of 2-tuples (row offset from start of measure, bpm) of
               bpm changes in this measure.
               must have at least 1 specifying the initial bpm of the measure
     '''
@@ -93,10 +94,9 @@ class Measure(Model):
         total_beats = 0
         for i, bpm in enumerate(self.bpms[1:]):
             prev_bpm = self.bpms[i]
-            time_diff = bpm[0] - prev_bpm[0]
-            duration += time_diff
-            beats = time_diff * prev_bpm[1] / 60  # b = s * b/min / (60 s/min)
-            total_beats += beats
+            beat_diff = bpm[0] - prev_bpm[0]
+            total_beats += beat_diff
+            duration += (beat_diff * 60) / prev_bpm[1]
         duration += (4 - total_beats) * 60 / self.bpms[-1][1]  # account for last bpm section
 
         return duration

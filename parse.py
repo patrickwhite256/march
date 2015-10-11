@@ -5,6 +5,7 @@ FIELD_LABEL_MAP = {
     'title': 'TITLE',
     'banner': 'BANNER',
     'bg': 'BACKGROUND',
+    'artist': 'ARTIST',
     'music': 'MUSIC',
     'offset': 'OFFSET',
     'sample_st': 'SAMPLESTART',
@@ -14,7 +15,7 @@ FIELD_LABEL_MAP = {
 
 NUMERIC_FIELDS = ['offset', 'sample_st', 'sample_len']
 
-COMMENT_RE = re.compile('\s*(\/\/.*)?')  # strip whitespace and comments
+COMMENT_RE = re.compile('\s*(\/\/.*)?$')  # strip whitespace and comments
 
 
 def parse_song(song_file):
@@ -53,7 +54,7 @@ def parse_song(song_file):
                 pass
 
     for chart in song.charts:
-        apply_bpms(chart, bpm_changes)
+        apply_bpms(chart, bpm_changes, song.offset)
 
     return song
 
@@ -117,28 +118,31 @@ def parse_chart(chart_contents):
     return chart
 
 
-def apply_bpms(chart, bpm_changes):
+def apply_bpms(chart, bpm_changes, offset):
     """
     Applies a list of BPM changes to a chart.
     Calculates and applies the 'time' field of measures
 
     :param chart: a models.Chart object
-    :param bpm_changes: a list of bpm changes, in the format "t.ttt=b.bbb", sorted by time
+    :param bpm_changes: a list of bpm changes, in the format "b.bbb=b.bbb", sorted by the first element
+    :param offset: the offset, in seconds, from the time of the start of the song
     """
 
-    bpms = [{'start_time': float(b.split('=')[0]), 'bpm': float(b.split('=')[1])} for b in bpm_changes]
+    bpms = [{'start_beats': float(b.split('=')[0]), 'bpm': float(b.split('=')[1])} for b in bpm_changes]
 
     bpm_it = iter(bpms)
     current_bpm, next_bpm = next(bpm_it), next(bpm_it, None)
 
-    time = 0
+    time = -offset
+    beats = 0
     for measure in chart.measures:
         measure.time = time
-        if next_bpm is not None and next_bpm['start_time'] == time:
+        if next_bpm is not None and next_bpm['start_beats'] == beats:
             current_bpm, next_bpm = next_bpm, next(bpm_it, None)
         measure.bpms.append((0, current_bpm['bpm']))
 
-        while next_bpm is not None and time + measure.duration() > next_bpm['start_time']:
-            measure.bpms.append((next_bpm['start_time'] - time, next_bpm['bpm']))
+        while next_bpm is not None and next_bpm['start_beats'] < beats + 4:
+            measure.bpms.append((next_bpm['start_beats'] - beats, next_bpm['bpm']))
             current_bpm, next_bpm = next_bpm, next(bpm_it, None)
         time = round(time + measure.duration(), 6)  # minimize fp error
+        beats += 4
