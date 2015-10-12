@@ -33,6 +33,10 @@ class MarchWindow(QWidget):
 		if(songFile is not None):
 			self.model = parse.parse_song(songFile)
 
+		self.model = models.Song()
+		if(songFile is not None):
+			self.model = parse.parse_song(songFile)
+
 		self.initUI()
 
 	
@@ -44,8 +48,8 @@ class MarchWindow(QWidget):
 		navView = MarchNavigationView(leftSideBar)
 
 		leftSideBar.addView(infoView)
-		leftSideBar.addView(songView)
 		leftSideBar.addView(navView)
+		leftSideBar.addView(songView)
 
 		trackView = MarchTrackView(self, self.model.charts[0])
 
