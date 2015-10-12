@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QGridLayout, QPushButton, QSlider
 from PyQt5.QtGui import QPainter, QPen, QBrush, QPixmap
 from PyQt5.QtCore import Qt, QRect
-from models import Chart, Note, Tap
+from models import Chart, Note, Tap, Hold
 from .arrow_label import MarchArrowLabel
 
 INTERVAL_SPACING = 40
@@ -111,6 +111,11 @@ class MarchTrackView(QWidget):
 				source_rect = QRect(0, 0, ARROW_SPACING, ARROW_SPACING)
 				target_rect = QRect(note_hoffset, note_voffset, ARROW_SPACING, ARROW_SPACING)
 				qp.drawPixmap(target_rect, arrow.pixmap(), source_rect)
+
+				if (note.note_type == Hold.TYPE_HOLD):
+					qp.setPen(QPen(Qt.blue, 2, Qt.DotLine))
+					print('hold - duration: {}'.format(note.duration)) 
+
 
 
 	# Event Handlers
