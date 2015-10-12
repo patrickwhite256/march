@@ -200,8 +200,6 @@ class IntervalEditWidget(QWidget):
             tStr = ""
 
         self.timeLabel.setText(tStr)
-<<<<<<< HEAD
-=======
 
     def playInterval(self):
         start, duration = self.getInterval()
@@ -214,4 +212,3 @@ class IntervalEditWidget(QWidget):
         self.mediaPlayer.setPosition(start)
         self.mediaPlayer.play()
         self.setState(QMediaPlayer.PlayingState)
->>>>>>> ed8e2b6... cleaning up a bit, still getting segfault
