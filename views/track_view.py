@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QFrame, QHBoxLayout, QVBoxLayout, QSizePoli
 from PyQt5.QtGui import QPainter, QPen, QBrush, QPixmap
 from PyQt5.QtCore import Qt, QRect
 from models import Chart, Note, Tap, Hold
-from .arrow_label import MarchArrowLabel
+from .arrow_label import MarchArrowLabel, MarchNotePixmapFactory
 
 INTERVAL_SPACING = 40
 ARROW_SPACING = 80
@@ -11,6 +11,7 @@ class MarchTrackView(QWidget):
 
     column = -1
     row = -1
+    note_type = '1'
 
     def __init__(self, parent, model):
         super().__init__(parent)
@@ -105,16 +106,13 @@ class MarchTrackView(QWidget):
             measure_offset = INTERVAL_SPACING * self.interval * measure_index + self.top_offset
 
             for note in measure.notes:
-                arrow = MarchArrowLabel(note.position, self)
+                pixmap = MarchNotePixmapFactory.getPixmap(note.note_type, note.position)
                 note_voffset = measure_offset + note.offset * note_interval - ARROW_SPACING / 2
                 note_hoffset = 90 + ARROW_SPACING * note.position # hurray for enums
                 source_rect = QRect(0, 0, ARROW_SPACING, ARROW_SPACING)
                 target_rect = QRect(note_hoffset, note_voffset, ARROW_SPACING, ARROW_SPACING)
-                qp.drawPixmap(target_rect, arrow.pixmap(), source_rect)
+                qp.drawPixmap(target_rect, pixmap, source_rect)
                 
-                #we were having an apparent memory leak due to arrow not being cleaned up
-                arrow.deleteLater()
-
                 if (note.note_type == Hold.TYPE_HOLD):
                     qp.setPen(QPen(Qt.blue, 2, Qt.DotLine))
                     print('hold - duration: {}'.format(note.duration)) 
@@ -159,6 +157,7 @@ class MarchTrackView(QWidget):
         if (init_len == len(selected_measure.notes)):
             #didn't remove anything, add the note here
             new_note = Tap()
+            new_note.note_type = self.note_type
             new_note.position = self.column
             new_note.offset = row_offset
             selected_measure.notes.append(new_note)
@@ -173,6 +172,9 @@ class MarchTrackView(QWidget):
                 self.top_offset -= 15
 
         self.update()
+
+    def noteTypeChangeEvent(self, event):
+        self.note_type = event;
     
         
                 

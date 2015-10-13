@@ -6,7 +6,7 @@ from .arrow_label import MarchArrowLabel, MarchBombLabel, MarchHoldLabel
 
 class MarchNoteLabel(QWidget):
 
-    selected = pyqtSignal()
+    selected = pyqtSignal(str)
 
     def __init__(self, note_type, parent):
         super().__init__(parent)
@@ -37,13 +37,21 @@ class MarchNoteLabel(QWidget):
         
     def setSelected(self, selected):
         qpal = QPalette()
-        qpal.setColor(QPalette.Background, Qt.cyan)
-        self.setAutoFillBackground(true)
+
+        if (selected):
+            qpal.setColor(QPalette.Background, Qt.cyan)
+        else:
+            qpal.setColor(QPalette.Background, Qt.transparent)
+
+        self.setAutoFillBackground(True)
         self.setPalette(qpal)
         self.show() 
+
+        if (selected):
+            self.selected.emit(self.note_type)
 
     # Event Handlers
 
     def mousePressEvent(self, event):
-        self.selected()
-        
+        self.setSelected(True)
+    

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtGui import QPixmap, QTransform, QPainter, QBrush
-from models import Note, Hold
+from models import Note, Tap, Hold
 
 class MarchArrowLabel(QLabel):
 	
@@ -73,4 +73,25 @@ class MarchHoldLabel(QLabel):
             pixmap.load('res/roll.png')
 
         self.setPixmap(pixmap.scaled(80, 80, Qt.KeepAspectRatio))
+
+
+'''
+Sometimes we want to get a just the pixmap for a label
+without the label widget itself (drawing pixmaps on the track for
+instance). This factory class produces us a pixmap of the desired
+type
+'''
+
+class MarchNotePixmapFactory():
+    @staticmethod
+    def getPixmap(note_type, position=0):
+        if (note_type == Tap.TYPE_MINE):
+            label = MarchBombLabel(None)
+        elif (note_type == Hold.TYPE_HOLD):
+            label = MarchHoldLabel(note_type, None)
+        else:
+            label = MarchArrowLabel(position, None)
+
+        pixmap = label.pixmap()
+        return pixmap.copy()
 
